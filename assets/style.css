@@ -1,0 +1,129 @@
+@font-face {
+    font-family: 'cairoblack';
+    src: url('cairo-black-webfont.woff2') format('woff2'),
+         url('cairo-black-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+
+
+@font-face {
+    font-family: 'cairobold';
+    src: url('cairo-bold-webfont.woff2') format('woff2'),
+         url('cairo-bold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+
+
+@font-face {
+    font-family: 'cairoextralight';
+    src: url('cairo-extralight-webfont.woff2') format('woff2'),
+         url('cairo-extralight-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+
+
+@font-face {
+    font-family: 'cairolight';
+    src: url('cairo-light-webfont.woff2') format('woff2'),
+         url('cairo-light-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+
+
+@font-face {
+    font-family: 'cairoregular';
+    src: url('cairo-regular-webfont.woff2') format('woff2'),
+         url('cairo-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'cairosemibold';
+    src: url('cairo-semibold-webfont.woff2') format('woff2'),
+         url('cairo-semibold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+body {
+  background-color: #26232C;
+  font-family: cairobold;
+}
+
+h1 {
+  color: #FEFEFE;
+  text-align: left;
+  font-family: cairobold;
+  font-weight: 600;
+}
+
+h2 {
+  color: #FEFEFE;
+  text-align: center;
+  font-family: cairosemibold;
+}
+
+h3 {
+  font-size: 15px;
+}
+
+h4	{
+  color: #FEFEFE;
+  font-size: 15px;
+  font-family: cairobold;
+}
+h5	{
+  color: #FEFEFE;
+  font-size: 18px;
+  font-family: cairobold;
+}
+
+.custom-tab-1{
+  background-color: #254e58 !important;
+  border-radius: 20px;
+  color: white !important;
+}
+.custom-tab-2{
+  background-color: #254e58 !important;
+  border-radius: 20px;
+  color: white !important;
+}
+.custom-tab-3{
+  background-color: #254e58 !important;
+  border-radius: 20px;
+  color: white !important;
+}
+.custom-tab-4{
+  background-color: #254e58 !important;
+  border-radius: 20px;
+  color: white !important;
+}
+.custom-tab-5{
+  background-color: #254e58 !important;
+  border-radius: 20px;
+  color: white !important;
+}
+
+
+
+
+
