@@ -1,4 +1,3 @@
-#
 from app import app
 import dash
 from dash import dcc, html
@@ -25,7 +24,11 @@ import seaborn as sns
     Output('click-data', 'children'),
     [Input('choropleth-map', 'clickData')])
 def display_click_data(clickData):
+    json_str = json.dumps(clickData)
+    resp = json.loads(json_str)
     return json.dumps(clickData, indent=2)
+    # for x in resp:
+    #     print(x['location'])
 
 # @app.callback(Output('tabs-example-content', 'children'),
 #               [Input('tabs-example', 'value')])

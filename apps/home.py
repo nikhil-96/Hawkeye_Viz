@@ -1,4 +1,4 @@
-import dash_html_components as html
+from dash import html
 import dash_bootstrap_components as dbc
 
 # needed only if running this as a single page app
