@@ -18,17 +18,129 @@ import seaborn as sns
 # """import data"""
 #
 
-#
-#
+mapbox_access_token = "pk.eyJ1IjoicGxvdGx5bWFwYm94IiwiYSI6ImNrOWJqb2F4djBnMjEzbG50amg0dnJieG4ifQ.Zme1-Uzoi75IaFbieBDl3A"
+mapbox_style = "mapbox://styles/plotlymapbox/cjvprkf3t1kns1cqjxuxmwixz"
+
+dfa = pd.read_csv('data/dft-road-casualty-statistics-accident-last-5-years.csv')
+# dfa.columns = dfa.columns.str.title()
+uk_cities = json.load(open("data/uk_districts.geojson", "r"))
+dfa = dfa.dropna()
+
+road_guide = pd.read_excel('data/Road-Safety-Open-Dataset-Data-Guide.xlsx')
+district_names = road_guide[road_guide['field name'] == 'local_authority_district']
+district_names.rename(columns={"code/format":"local_authority_district"}, inplace=True)
+dfa['local_authority_district'] = dfa['local_authority_district'].map(district_names.set_index('local_authority_district')['label'])
+
+df1 = dfa[['local_authority_ons_district', 'number_of_casualties']]
+df1['number_of_accidents'] = 1
+district_names = road_guide[road_guide['field name'] == 'local_authority_ons_district']
+district_names.rename(columns={"code/format": "local_authority_ons_district"}, inplace=True)
+ons_names = district_names[['local_authority_ons_district', 'label']]
+df_final = pd.merge(df1, ons_names, on="local_authority_ons_district", how="left")
+df_final = df_final.groupby(['local_authority_ons_district', 'label'], as_index=False).sum()
+# px.set_mapbox_access_token(mapbox_access_token)
+
 @app.callback(
-    Output('click-data', 'children'),
-    [Input('choropleth-map', 'clickData')])
-def display_click_data(clickData):
-    json_str = json.dumps(clickData)
-    resp = json.loads(json_str)
-    return json.dumps(clickData, indent=2)
-    # for x in resp:
-    #     print(x['location'])
+    Output(component_id='choropleth-map', component_property='figure'),
+    [Input(component_id='choropleth-map', component_property='clickData')])
+def update_graph(clickData):
+    dfa = pd.read_csv('data/dft-road-casualty-statistics-accident-last-5-years.csv')
+    dfa = dfa.dropna()
+    if clickData is None:
+        fig = px.choropleth_mapbox(df_final, locations="local_authority_ons_district",
+                                   featureidkey="properties.lad19cd",
+                                   geojson=uk_cities, color="number_of_accidents", opacity=0.8,
+                                   color_continuous_scale=px.colors.sequential.YlOrBr,
+                                   hover_name="label",
+                                   mapbox_style="carto-positron",
+                                   hover_data=['number_of_accidents', 'number_of_casualties'],
+                                   zoom=4.5, center={"lat": 53.72, "lon": -1.96})
+
+        fig.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
+                          xaxis=dict(color='#9D9D9D',
+                                     gridcolor='#9D9D9D'),
+                          yaxis=dict(gridcolor='#9D9D9D',
+                                     color="#9D9D9D"),
+                          paper_bgcolor='#26232C',
+                          legend_font_color='white',
+                          legend_title_font_color='white',
+                          title_font_color="white",
+                          margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
+        return fig
+    else:
+        json_str = json.dumps(clickData, indent=2)
+        cities = json.loads(json_str)
+        for feature in uk_cities["features"]:
+            if feature["properties"]["lad19cd"] == cities['points'][0]['location']:
+                uk_city = feature
+        print(uk_city["properties"]["lat"])
+        print(uk_city["properties"]["long"])
+        fig = px.choropleth_mapbox(df_final, locations="local_authority_ons_district",
+                                   featureidkey="properties.lad19cd",
+                                   geojson=uk_city, color="number_of_accidents", opacity=0.8,
+                                   color_continuous_scale=px.colors.sequential.YlOrBr,
+                                   hover_name="label",
+                                   mapbox_style="carto-positron",
+                                   hover_data=['number_of_accidents', 'number_of_casualties'],
+                                   zoom=7, center={"lat": uk_city["properties"]["lat"], "lon": uk_city["properties"]["long"]})
+
+        fig.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
+                          xaxis=dict(color='#9D9D9D',
+                                     gridcolor='#9D9D9D'),
+                          yaxis=dict(gridcolor='#9D9D9D',
+                                     color="#9D9D9D"),
+                          paper_bgcolor='#26232C',
+                          legend_font_color='white',
+                          legend_title_font_color='white',
+                          title_font_color="white",
+                          margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
+        return fig
+
+@app.callback(
+    Output(component_id='accident-graph', component_property='figure'),
+    [Input(component_id='choropleth-map', component_property='clickData')])
+def update_graph(clickData):
+    dfa = pd.read_csv('data/dft-road-casualty-statistics-accident-last-5-years.csv')
+    dfa = dfa.dropna()
+    if clickData is None:
+        print(type(clickData))
+        dfa_grouped = (
+            dfa.groupby(
+                # normalize all dates to start of month
+                dfa['date'].astype('datetime64[M]')
+            )['accident_index'].count().rename('total no of accidents').to_frame()
+        )
+        dfa_grouped.head()
+        accidents_fig = px.line(dfa_grouped,
+                                y='total no of accidents',
+                                hover_data=['total no of accidents'],
+                                title='Accidents per Month in UK')
+        return accidents_fig
+    else:
+        json_str = json.dumps(clickData, indent=2)
+        cities = json.loads(json_str)
+        print(cities['points'][0]['location'])
+        filtered_dfa = dfa[dfa['local_authority_ons_district'] == cities['points'][0]['location']]
+        dfa_grouped = (
+            filtered_dfa.groupby(
+                # normalize all dates to start of month
+                filtered_dfa['date'].astype('datetime64[M]')
+            )['accident_index'].count().rename('total no of accidents').to_frame()
+        )
+        dfa_grouped.head()
+        city = cities['points'][0]['hovertext']
+        accidents_fig = px.line(dfa_grouped,
+                                y='total no of accidents',
+                                hover_data=['total no of accidents'],
+                                title=f'Accidents per Month in {city}')
+        # return cities['points'][0]['location']
+        return accidents_fig
+
+
+    # resp = json.loads(json_str)
+    # return json.dumps(clickData, indent=2)
+    # pairs = resp.items()
+    # print(type(json_str))
 
 # @app.callback(Output('tabs-example-content', 'children'),
 #               [Input('tabs-example', 'value')])
