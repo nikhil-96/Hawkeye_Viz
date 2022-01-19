@@ -136,6 +136,40 @@ def update_graph(clickData):
         # return cities['points'][0]['location']
         return accidents_fig
 
+@app.callback(
+        Output(component_id='choropleth-map', component_property='figure'),
+        [Input(component_id='year', component_property='value'),
+         Input(component_id='city', component_property='value')]
+    )
+
+def update_graph(years_chosen, city):
+    dff = df_final[df_final['accident_year'].between(years_chosen[0], years_chosen[1])]
+    #if city in cities:
+    if city is not None:
+        dff = dff[dff['label'] == city]
+    dff = dff.drop(columns=['accident_year'])
+    dff = dff.groupby(['local_authority_ons_district', 'label'], as_index=False).sum()
+# px.set_mapbox_access_token(mapbox_access_token)
+    fig = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
+                            featureidkey="properties.lad19cd",
+                            geojson=uk_cities, color="number_of_accidents", opacity=0.8,
+                            color_continuous_scale= 'Blues',
+                            hover_name="label",
+                            mapbox_style="carto-positron", hover_data=['number_of_accidents', 'number_of_casualties'],
+                            zoom=4.5, center={"lat":51, "lon": 0})
+
+    fig.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
+                      xaxis=dict(color='#9D9D9D',
+                                 gridcolor='#9D9D9D'),
+                      yaxis=dict(gridcolor='#9D9D9D',
+                                 color="#9D9D9D"),
+                      paper_bgcolor='#26232C',
+                      legend_font_color='white',
+                      legend_title_font_color='white',
+                      title_font_color="white",
+                      margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
+
+    return fig
 
     # resp = json.loads(json_str)
     # return json.dumps(clickData, indent=2)
