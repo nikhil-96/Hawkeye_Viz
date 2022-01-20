@@ -13,41 +13,30 @@ from datetime import datetime as dt
 import pathlib
 import matplotlib.pyplot as plt
 import seaborn as sns
-#
-#
-# """import data"""
-#
+from apps.exploration import df_final
 
-mapbox_access_token = "pk.eyJ1IjoicGxvdGx5bWFwYm94IiwiYSI6ImNrOWJqb2F4djBnMjEzbG50amg0dnJieG4ifQ.Zme1-Uzoi75IaFbieBDl3A"
-mapbox_style = "mapbox://styles/plotlymapbox/cjvprkf3t1kns1cqjxuxmwixz"
-
-dfa = pd.read_csv('data/dft-road-casualty-statistics-accident-last-5-years.csv')
-# dfa.columns = dfa.columns.str.title()
 uk_cities = json.load(open("data/uk_districts.geojson", "r"))
-dfa = dfa.dropna()
-
-road_guide = pd.read_excel('data/Road-Safety-Open-Dataset-Data-Guide.xlsx')
-district_names = road_guide[road_guide['field name'] == 'local_authority_district']
-district_names.rename(columns={"code/format":"local_authority_district"}, inplace=True)
-dfa['local_authority_district'] = dfa['local_authority_district'].map(district_names.set_index('local_authority_district')['label'])
-
-df1 = dfa[['local_authority_ons_district', 'number_of_casualties']]
-df1['number_of_accidents'] = 1
-district_names = road_guide[road_guide['field name'] == 'local_authority_ons_district']
-district_names.rename(columns={"code/format": "local_authority_ons_district"}, inplace=True)
-ons_names = district_names[['local_authority_ons_district', 'label']]
-df_final = pd.merge(df1, ons_names, on="local_authority_ons_district", how="left")
-df_final = df_final.groupby(['local_authority_ons_district', 'label'], as_index=False).sum()
-# px.set_mapbox_access_token(mapbox_access_token)
+print("Callbacks")
 
 @app.callback(
-    Output(component_id='choropleth-map', component_property='figure'),
-    [Input(component_id='choropleth-map', component_property='clickData')])
-def update_graph(clickData):
+    [Output(component_id='choropleth-map', component_property='figure'),
+     Output(component_id='accident-graph', component_property='figure')],
+    [Input(component_id='choropleth-map', component_property='clickData'),
+     Input(component_id='year', component_property='value'),
+     Input(component_id='city', component_property='value')]
+)
+def update_graph(clickData, year, city):
     dfa = pd.read_csv('data/dft-road-casualty-statistics-accident-last-5-years.csv')
     dfa = dfa.dropna()
-    if clickData is None:
-        fig = px.choropleth_mapbox(df_final, locations="local_authority_ons_district",
+    print(year)
+    if year:
+        dff = df_final[df_final['accident_year'].between(year[0], year[1])]
+        dff = dff.drop(columns=['accident_year'])
+        df_whole = dff
+        dff = dff.groupby(['local_authority_ons_district', 'label'], as_index=False).sum()
+
+    if clickData is None and city is None:
+        fig = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
                                    featureidkey="properties.lad19cd",
                                    geojson=uk_cities, color="number_of_accidents", opacity=0.8,
                                    color_continuous_scale=px.colors.sequential.YlOrBr,
@@ -62,52 +51,16 @@ def update_graph(clickData):
                           yaxis=dict(gridcolor='#9D9D9D',
                                      color="#9D9D9D"),
                           paper_bgcolor='#26232C',
-                          legend_font_color='white',
-                          legend_title_font_color='white',
-                          title_font_color="white",
+                          #legend_font_color='white',
+                          #legend_title_font_color='white',
+                          #title_font_color="white",
+                          font_color = 'white',
                           margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
-        return fig
-    else:
-        json_str = json.dumps(clickData, indent=2)
-        cities = json.loads(json_str)
-        for feature in uk_cities["features"]:
-            if feature["properties"]["lad19cd"] == cities['points'][0]['location']:
-                uk_city = feature
-        print(uk_city["properties"]["lat"])
-        print(uk_city["properties"]["long"])
-        fig = px.choropleth_mapbox(df_final, locations="local_authority_ons_district",
-                                   featureidkey="properties.lad19cd",
-                                   geojson=uk_city, color="number_of_accidents", opacity=0.8,
-                                   color_continuous_scale=px.colors.sequential.YlOrBr,
-                                   hover_name="label",
-                                   mapbox_style="carto-positron",
-                                   hover_data=['number_of_accidents', 'number_of_casualties'],
-                                   zoom=7, center={"lat": uk_city["properties"]["lat"], "lon": uk_city["properties"]["long"]})
 
-        fig.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
-                          xaxis=dict(color='#9D9D9D',
-                                     gridcolor='#9D9D9D'),
-                          yaxis=dict(gridcolor='#9D9D9D',
-                                     color="#9D9D9D"),
-                          paper_bgcolor='#26232C',
-                          legend_font_color='white',
-                          legend_title_font_color='white',
-                          title_font_color="white",
-                          margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
-        return fig
-
-@app.callback(
-    Output(component_id='accident-graph', component_property='figure'),
-    [Input(component_id='choropleth-map', component_property='clickData')])
-def update_graph(clickData):
-    dfa = pd.read_csv('data/dft-road-casualty-statistics-accident-last-5-years.csv')
-    dfa = dfa.dropna()
-    if clickData is None:
-        print(type(clickData))
         dfa_grouped = (
-            dfa.groupby(
+            df_whole.groupby(
                 # normalize all dates to start of month
-                dfa['date'].astype('datetime64[M]')
+                df_whole['date'].astype('datetime64[M]')
             )['accident_index'].count().rename('total no of accidents').to_frame()
         )
         dfa_grouped.head()
@@ -115,12 +68,56 @@ def update_graph(clickData):
                                 y='total no of accidents',
                                 hover_data=['total no of accidents'],
                                 title='Accidents per Month in UK')
-        return accidents_fig
+
+        accidents_fig.update_layout(plot_bgcolor='#26232C',
+                                    paper_bgcolor='#26232C',
+                                    font_color='white')
+
+        return fig, accidents_fig
+
     else:
-        json_str = json.dumps(clickData, indent=2)
-        cities = json.loads(json_str)
-        print(cities['points'][0]['location'])
-        filtered_dfa = dfa[dfa['local_authority_ons_district'] == cities['points'][0]['location']]
+        if city is not None:
+            print(city)
+            location = dff.loc[dff['label'] == city, 'local_authority_ons_district'].iloc[0]
+        else:
+            print("Holaaa")
+            json_str = json.dumps(clickData, indent=2)
+            cities = json.loads(json_str)
+            location = cities['points'][0]['location']
+            city = cities['points'][0]['hovertext']
+
+        for feature in uk_cities["features"]:
+            if feature["properties"]["lad19cd"] == location:
+                uk_city = feature
+        # dff = dff[dff['local_authority_ons_district'] == uk_city["properties"]["lad19cd"]]
+        # dff = dff.drop(columns=['accident_year'])
+        # dff = dff.groupby(['local_authority_ons_district', 'label'], as_index=False).sum()
+        print(uk_city["properties"]["lat"])
+        print(uk_city["properties"]["long"])
+        dff = dff[dff['local_authority_ons_district'] == location]
+        fig = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
+                                   featureidkey="properties.lad19cd",
+                                   geojson=uk_cities, color="number_of_accidents", opacity=0.8,
+                                   color_continuous_scale=px.colors.sequential.YlOrBr,
+                                   hover_name="label",
+                                   mapbox_style="carto-positron",
+                                   hover_data=['number_of_accidents', 'number_of_casualties'],
+                                   zoom=8,
+                                   center={"lat": uk_city["properties"]["lat"], "lon": uk_city["properties"]["long"]})
+
+        fig.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
+                          xaxis=dict(color='#9D9D9D',
+                                     gridcolor='#9D9D9D'),
+                          yaxis=dict(gridcolor='#9D9D9D',
+                                     color="#9D9D9D"),
+                          paper_bgcolor='#26232C',
+                          #legend_font_color='white',
+                          #legend_title_font_color='white',
+                          #title_font_color="white",
+                          font_color='white',
+                          margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
+
+        filtered_dfa = df_whole[df_whole['local_authority_ons_district'] == location]
         dfa_grouped = (
             filtered_dfa.groupby(
                 # normalize all dates to start of month
@@ -128,48 +125,18 @@ def update_graph(clickData):
             )['accident_index'].count().rename('total no of accidents').to_frame()
         )
         dfa_grouped.head()
-        city = cities['points'][0]['hovertext']
         accidents_fig = px.line(dfa_grouped,
                                 y='total no of accidents',
                                 hover_data=['total no of accidents'],
                                 title=f'Accidents per Month in {city}')
-        # return cities['points'][0]['location']
-        return accidents_fig
 
-@app.callback(
-        Output(component_id='choropleth-map', component_property='figure'),
-        [Input(component_id='year', component_property='value'),
-         Input(component_id='city', component_property='value')]
-    )
+        accidents_fig.update_layout(plot_bgcolor='#26232C',
+                  paper_bgcolor='#26232C',
+                  font_color = 'white')
 
-def update_graph(years_chosen, city):
-    dff = df_final[df_final['accident_year'].between(years_chosen[0], years_chosen[1])]
-    #if city in cities:
-    if city is not None:
-        dff = dff[dff['label'] == city]
-    dff = dff.drop(columns=['accident_year'])
-    dff = dff.groupby(['local_authority_ons_district', 'label'], as_index=False).sum()
-# px.set_mapbox_access_token(mapbox_access_token)
-    fig = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
-                            featureidkey="properties.lad19cd",
-                            geojson=uk_cities, color="number_of_accidents", opacity=0.8,
-                            color_continuous_scale= 'Blues',
-                            hover_name="label",
-                            mapbox_style="carto-positron", hover_data=['number_of_accidents', 'number_of_casualties'],
-                            zoom=4.5, center={"lat":51, "lon": 0})
+        return fig, accidents_fig
 
-    fig.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
-                      xaxis=dict(color='#9D9D9D',
-                                 gridcolor='#9D9D9D'),
-                      yaxis=dict(gridcolor='#9D9D9D',
-                                 color="#9D9D9D"),
-                      paper_bgcolor='#26232C',
-                      legend_font_color='white',
-                      legend_title_font_color='white',
-                      title_font_color="white",
-                      margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
-    return fig
 
     # resp = json.loads(json_str)
     # return json.dumps(clickData, indent=2)
