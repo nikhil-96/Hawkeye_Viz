@@ -51,9 +51,10 @@ def update_graph(clickData, year, city):
                           yaxis=dict(gridcolor='#9D9D9D',
                                      color="#9D9D9D"),
                           paper_bgcolor='#26232C',
-                          legend_font_color='white',
-                          legend_title_font_color='white',
-                          title_font_color="white",
+                          # legend_font_color='white',
+                          # legend_title_font_color='white',
+                          # title_font_color="white",
+                          font_color='white',
                           margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
         dfa_grouped = (
@@ -67,6 +68,10 @@ def update_graph(clickData, year, city):
                                 y='total no of accidents',
                                 hover_data=['total no of accidents'],
                                 title='Accidents per Month in UK')
+
+        accidents_fig.update_layout(plot_bgcolor='#26232C',
+                                    paper_bgcolor='#26232C',
+                                    font_color='white')
 
         return fig, accidents_fig
 
@@ -106,9 +111,10 @@ def update_graph(clickData, year, city):
                           yaxis=dict(gridcolor='#9D9D9D',
                                      color="#9D9D9D"),
                           paper_bgcolor='#26232C',
-                          legend_font_color='white',
-                          legend_title_font_color='white',
-                          title_font_color="white",
+                          # legend_font_color='white',
+                          # legend_title_font_color='white',
+                          # title_font_color="white",
+                          font_color='white',
                           margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
         filtered_dfa = df_whole[df_whole['local_authority_ons_district'] == location]
@@ -123,6 +129,10 @@ def update_graph(clickData, year, city):
                                 y='total no of accidents',
                                 hover_data=['total no of accidents'],
                                 title=f'Accidents per Month in {city}')
+
+        accidents_fig.update_layout(plot_bgcolor='#26232C',
+                                    paper_bgcolor='#26232C',
+                                    font_color='white')
 
         return fig, accidents_fig
 
