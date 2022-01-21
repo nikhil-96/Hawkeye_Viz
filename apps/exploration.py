@@ -39,13 +39,13 @@ cities = df_final['label'].dropna().unique()
 print("Exploration")
 layout = html.Div([
     html.Div([
-        html.Label("Choose a City"),
+        html.Label("Choose a City", style={ 'color': 'white'}),
         dcc.Dropdown(
             id='city',
             options=[
                 {"label": i, "value": i} for i in cities],
             placeholder='Select a City'),
-    ], style={'color': 'black'}),
+    ], style={'color': 'black', 'width': '100%', 'padding-left':'20%', 'padding-right':'20%'}),
     html.Div([
         dcc.Graph(id='choropleth-map', style={'width': '60%', 'float': 'left'}, figure={}, clickData=None),
         dcc.Graph(id='accident-graph', style={'width': '40%', 'float': 'right'}, figure={}, clickData=None),
@@ -59,7 +59,7 @@ layout = html.Div([
             value=[2016, 2020],
             marks={str(i): {'label': str(i), 'style': {'color': 'white'}} for i in years},
         )
-    ], style={"width": "60%", 'float': 'left', 'color': 'white'})
+    ], style={"width": "100%", 'float': 'left', 'color': 'white', 'padding-left':'20%', 'padding-right':'20%'})
 ])
 
     
