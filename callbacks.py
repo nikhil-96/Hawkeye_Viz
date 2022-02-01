@@ -13,30 +13,37 @@ from datetime import datetime as dt
 import pathlib
 import matplotlib.pyplot as plt
 import seaborn as sns
-from apps.exploration import df_final
+from apps.exploration import df_final, acc_cas_veh_df
 
 uk_cities = json.load(open("data/uk_districts.geojson", "r"))
 print("Callbacks")
 
 @app.callback(
     [Output(component_id='choropleth-map', component_property='figure'),
-     Output(component_id='accident-graph', component_property='figure')],
+     Output(component_id='accident-graph', component_property='figure'),
+     Output(component_id='days-hours-graph', component_property='figure'),
+     Output(component_id='acc-cas-graph', component_property='figure'),
+     Output(component_id='treemap-graph', component_property='figure'),
+     Output(component_id='road-speed-graph', component_property='figure'),
+     Output(component_id='severity-graph', component_property='figure')],
     [Input(component_id='choropleth-map', component_property='clickData'),
      Input(component_id='year', component_property='value'),
      Input(component_id='city', component_property='value')]
 )
 def update_graph(clickData, year, city):
-    dfa = pd.read_csv('data/dft-road-casualty-statistics-accident-last-5-years.csv')
-    dfa = dfa.dropna()
+    # dfa = pd.read_csv('data/dft-road-casualty-statistics-accident-last-5-years.csv')
+    # dfa = dfa.dropna()
     print(year)
     if year:
         dff = df_final[df_final['accident_year'].between(year[0], year[1])]
-        dff = dff.drop(columns=['accident_year'])
+        dfacv = acc_cas_veh_df[acc_cas_veh_df['accident_year'].between(year[0], year[1])]
+        dff.drop(columns=['accident_year'],inplace=True)
+        dfacv.drop(columns=['accident_year'], inplace=True)
         df_whole = dff
         dff = dff.groupby(['local_authority_ons_district', 'label'], as_index=False).sum()
 
     if clickData is None and city is None:
-        fig = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
+        fig1 = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
                                    featureidkey="properties.lad19cd",
                                    geojson=uk_cities, color="number_of_accidents", opacity=0.8,
                                    color_continuous_scale=px.colors.sequential.YlOrBr,
@@ -45,35 +52,135 @@ def update_graph(clickData, year, city):
                                    hover_data=['number_of_accidents', 'number_of_casualties'],
                                    zoom=4.5, center={"lat": 53.72, "lon": -1.96})
 
-        fig.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
+        fig1.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
                           xaxis=dict(color='#9D9D9D',
                                      gridcolor='#9D9D9D'),
                           yaxis=dict(gridcolor='#9D9D9D',
                                      color="#9D9D9D"),
                           paper_bgcolor='#26232C',
-                          # legend_font_color='white',
-                          # legend_title_font_color='white',
-                          # title_font_color="white",
-                          font_color='white',
+                          legend_font_color='white',
+                          legend_title_font_color='white',
+                          title_font_color="white",
                           margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
+
 
         dfa_grouped = (
             df_whole.groupby(
                 # normalize all dates to start of month
                 df_whole['date'].astype('datetime64[M]')
-            )['accident_index'].count().rename('total no of accidents').to_frame()
+            )['accident_index'].count().rename('Number of Accidents').to_frame()
         )
-        dfa_grouped.head()
-        accidents_fig = px.line(dfa_grouped,
-                                y='total no of accidents',
-                                hover_data=['total no of accidents'],
-                                title='Accidents per Month in UK')
+        fig2 = px.scatter(dfa_grouped,
+                                y='Number of Accidents',
+                                hover_data=['Number of Accidents'],
+                                title='Accidents per Month in UK',trendline="rolling",trendline_options=dict(window=6))
 
-        accidents_fig.update_layout(plot_bgcolor='#26232C',
-                                    paper_bgcolor='#26232C',
-                                    font_color='white')
+        """GRAPH 2 --- Accidents per Daytime and Weekday Heatmap"""
 
-        return fig, accidents_fig
+        df_whole['date'] = pd.to_datetime(df_whole['date'])
+        weekday = df_whole['date'].dt.day_name()
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        # slice first and second string from time column
+        df_whole['hour'] = df_whole['time'].str[0:2]
+        # convert new column to numeric datetype
+        df_whole['hour'] = pd.to_numeric(df_whole['hour'])
+        # drop null values in our new column
+        accidents_df = df_whole.dropna(subset=['hour'])
+        # cast to integer values
+        accidents_df['hour'] = accidents_df['hour'].astype('int')
+
+        # define a function that turns the hours into daytime groups
+        def when_was_it(hour):
+            if hour >= 5 and hour < 10:
+                return "Morning Rush"
+            elif hour >= 10 and hour < 15:
+                return "Office Hours"
+            elif hour >= 15 and hour < 19:
+                return "Afternoon Rush"
+            elif hour >= 19 and hour < 23:
+                return "Evening"
+            else:
+                return "Night"
+
+        # apply thus function to our temporary hour column
+        accidents_df['daytime'] = accidents_df['hour'].apply(when_was_it)
+        daytime = accidents_df['daytime'].values
+        timeslots = ['Morning Rush', 'Office Hours', 'Afternoon Rush','Evening', 'Night']
+        daytime_week_table = accidents_df.groupby([daytime, weekday], sort=False).size()
+        daytime_week_table = daytime_week_table.rename_axis(['Daytime', 'Weekday']) \
+            .unstack('Weekday') \
+            .reindex(index=timeslots, columns=days)
+        fig3 = px.imshow(daytime_week_table, text_auto=False, color_continuous_scale='PuBu',
+                         title="Accidents per Daytime and Weekday")
+
+
+        acc_per_year = df_whole.groupby(df_whole['date'].astype('datetime64[Y]')
+                                        )['accident_index'].count().rename('Total Number of Accidents').to_frame()
+
+        cas_per_year = (df_whole.groupby(df_whole['date'].astype('datetime64[Y]'))
+                               ['number_of_casualties'].sum().rename('Total Number of Casualties').to_frame())
+        acc_cas_per_year = pd.concat([acc_per_year, cas_per_year], axis=1)
+        fig4 = go.Figure(
+            data=[
+                go.Bar(name='Accidents', x=acc_cas_per_year.index, y=acc_cas_per_year['Total Number of Accidents'], yaxis='y',
+                       offsetgroup=1),
+                go.Bar(name='Casualties', x=acc_cas_per_year.index, y=acc_cas_per_year['Total Number of Casualties'], yaxis='y',
+                       offsetgroup=2)
+            ],
+            layout={
+                'yaxis': {'title': 'Accidents/Casualties Number'},
+                'yaxis2': {'title': 'Casualties', 'overlaying': 'y', 'side': 'right'}
+            }
+        )
+        # Change the bar mode
+        fig4.update_layout(barmode='group')
+
+        def vehicle(veh_type):
+            if veh_type in range(8,10):
+                return "Car"
+            elif veh_type in range(0,6) or veh_type == 22 or veh_type == 23:
+                return "Motorcycle"
+            elif veh_type in range(10,12):
+                return "Bus"
+            elif veh_type == 17 or veh_type in range(19,22) or veh_type == 113:
+                return "Truck"
+            else:
+                return "Other Vehicle"
+
+        """GRAPH 5 --- Casualties by Means of transport / Treemap"""
+        dfacv['vehicle'] = dfacv['vehicle_type'].apply(vehicle)
+
+        vehicle_type_casualties = (dfacv.groupby(['vehicle'])
+                                   ['number_of_casualties'].sum().rename('Accidents').to_frame())
+        vehicle_type_casualties.reset_index(inplace=True)
+        fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
+                          values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
+                          title="Casualties by Means of Transport",hover_data=['Accidents'])
+        fig5.update_layout(uniformtext=dict(minsize=11, mode='show'))
+
+        """GRAPH 6 --- Road Type - Speed Limit """
+        road_speed_df = (dfacv.groupby(['road_type', 'speed_limit'])['accident_index'].count().rename(
+            'Accidents').to_frame())
+        road_speed_df.reset_index(inplace=True)
+        road_speed_df = road_speed_df[road_speed_df.road_type != 'Data missing or out of range']
+        road_speed_df = road_speed_df[road_speed_df.speed_limit != 'Data missing or out of range']
+        fig6 = px.bar(road_speed_df, x=road_speed_df['Accidents'], y=road_speed_df['road_type'],
+                      color=road_speed_df['speed_limit'], text=road_speed_df['speed_limit'],
+                      color_discrete_sequence=px.colors.sequential.Plasma_r,
+                      title="Number of Accidents per Road Type/Speed Limit",orientation='h')
+
+        dfacv = (dfacv.groupby(['casualty_severity'])
+                           ['accident_index'].count().rename('Total Number of Accidents').to_frame())
+        # cas_severity_df.reset_index(inplace=True)
+        # print(cas_severity_df)
+        data = dfacv['Total Number of Accidents']
+        labels = dfacv.index
+        colors = ['red', 'darkorange', 'gold']
+        fig7 = px.pie(dfacv, values=data, names=labels, hole=0.5, title="Casualties Severity")
+        fig7.update_traces(hoverinfo='label+percent', textfont_size=20,
+                           marker=dict(colors=colors, line=dict(color='#111111', width=1)))
+
+        return fig1, fig2, fig3, fig4, fig5, fig6, fig7
 
     else:
         if city is not None:
@@ -95,7 +202,7 @@ def update_graph(clickData, year, city):
         print(uk_city["properties"]["lat"])
         print(uk_city["properties"]["long"])
         dff = dff[dff['local_authority_ons_district'] == location]
-        fig = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
+        fig1 = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
                                    featureidkey="properties.lad19cd",
                                    geojson=uk_cities, color="number_of_accidents", opacity=0.8,
                                    color_continuous_scale=px.colors.sequential.YlOrBr,
@@ -105,36 +212,140 @@ def update_graph(clickData, year, city):
                                    zoom=8,
                                    center={"lat": uk_city["properties"]["lat"], "lon": uk_city["properties"]["long"]})
 
-        fig.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
+        fig1.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
                           xaxis=dict(color='#9D9D9D',
                                      gridcolor='#9D9D9D'),
                           yaxis=dict(gridcolor='#9D9D9D',
                                      color="#9D9D9D"),
                           paper_bgcolor='#26232C',
-                          # legend_font_color='white',
-                          # legend_title_font_color='white',
-                          # title_font_color="white",
-                          font_color='white',
+                          legend_font_color='white',
+                          legend_title_font_color='white',
+                          title_font_color="white",
                           margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
+        #Filter by location
+        filtered_df_final = df_final[df_final['local_authority_ons_district'] == location]
         filtered_dfa = df_whole[df_whole['local_authority_ons_district'] == location]
+        filtered_dfacv = dfacv[dfacv['local_authority_ons_district'] == location]
+
         dfa_grouped = (
             filtered_dfa.groupby(
                 # normalize all dates to start of month
                 filtered_dfa['date'].astype('datetime64[M]')
-            )['accident_index'].count().rename('total no of accidents').to_frame()
+            )['accident_index'].count().rename('Number of Accidents').to_frame()
         )
-        dfa_grouped.head()
-        accidents_fig = px.line(dfa_grouped,
-                                y='total no of accidents',
-                                hover_data=['total no of accidents'],
-                                title=f'Accidents per Month in {city}')
+        fig2 = px.scatter(dfa_grouped,
+                                y='Number of Accidents',
+                                hover_data=['Number of Accidents'],
+                                title=f'Accidents per Month in {city}',trendline="rolling",
+                                trendline_options=dict(window=6))
+        # fig2 = px.line(dfa_grouped,
+        #                         y='total no of accidents',
+        #                         hover_data=['total no of accidents'],
+        #                         title=f'Accidents per Month in {city}')
 
-        accidents_fig.update_layout(plot_bgcolor='#26232C',
-                                    paper_bgcolor='#26232C',
-                                    font_color='white')
+        """GRAPH 2 --- Accidents per Daytime and Weekday Heatmap"""
+        filtered_dfa['date'] = pd.to_datetime(filtered_dfa['date'])
+        weekday = filtered_dfa['date'].dt.day_name()
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        filtered_dfa['hour'] = filtered_dfa['time'].str[0:2]
+        filtered_dfa['hour'] = pd.to_numeric(filtered_dfa['hour'])
+        filtered_dfa = filtered_dfa.dropna(subset=['hour'])
+        filtered_dfa['hour'] = filtered_dfa['hour'].astype('int')
 
-        return fig, accidents_fig
+        # define a function that turns the hours into daytime groups
+        def when_was_it(hour):
+            if hour >= 5 and hour < 10:
+                return "Morning Rush"
+            elif hour >= 10 and hour < 15:
+                return "Office Hours"
+            elif hour >= 15 and hour < 19:
+                return "Afternoon Rush"
+            elif hour >= 19 and hour < 23:
+                return "Evening"
+            else:
+                return "Night"
+
+        # apply thus function to our temporary hour column
+        filtered_dfa['daytime'] = filtered_dfa['hour'].apply(when_was_it)
+        daytime = filtered_dfa['daytime'].values
+        timeslots = ['Morning Rush', 'Office Hours', 'Afternoon Rush','Evening', 'Night']
+        daytime_week_table = filtered_dfa.groupby([daytime, weekday], sort=False).size()
+        daytime_week_table = daytime_week_table.rename_axis(['Daytime', 'Weekday']) \
+            .unstack('Weekday') \
+            .reindex(index=timeslots, columns=days)
+        fig3 = px.imshow(daytime_week_table, text_auto=False, color_continuous_scale='PuBu',
+                         title=f'Accidents per Daytime and Weekday in {city}')
+
+        acc_per_year = (filtered_df_final.groupby(filtered_df_final['accident_year'])
+                              ['accident_index'].count().rename('Total Number of Accidents').to_frame())
+
+        cas_per_year = (filtered_df_final.groupby(filtered_df_final['accident_year'])
+                               ['number_of_casualties'].sum().rename('Total Number of Casualties').to_frame())
+        acc_cas_per_year = pd.concat([acc_per_year, cas_per_year], axis=1)
+
+        fig4 = go.Figure(
+            data=[
+                go.Bar(name='Accidents', x=acc_cas_per_year.index, y=acc_cas_per_year['Total Number of Accidents'], yaxis='y',
+                       offsetgroup=1),
+                go.Bar(name='Casualties', x=acc_cas_per_year.index, y=acc_cas_per_year['Total Number of Casualties'], yaxis='y',
+                       offsetgroup=2)
+            ],
+            layout={
+                'yaxis': {'title': 'Accidents/Casualties Number'},
+                'yaxis2': {'title': 'Casualties', 'overlaying': 'y', 'side': 'right'}
+            }
+        )
+        # Change the bar mode
+        fig4.update_layout(barmode='group')
+
+        def vehicle(veh_type):
+            if veh_type in range(8, 10):
+                return "Car"
+            elif veh_type in range(0, 6) or veh_type == 22 or veh_type == 23:
+                return "Motorcycle"
+            elif veh_type in range(10, 12):
+                return "Bus"
+            elif veh_type == 17 or veh_type in range(19, 22) or veh_type == 113:
+                return "Truck"
+            else:
+                return "Other Vehicle"
+
+        """GRAPH 5 --- Casualties by Means of transport / Treemap"""
+        filtered_dfacv['vehicle'] = filtered_dfacv['vehicle_type'].apply(vehicle)
+
+        vehicle_type_casualties = (filtered_dfacv.groupby(['vehicle'])
+                                   ['number_of_casualties'].sum().rename('Accidents').to_frame())
+        vehicle_type_casualties.reset_index(inplace=True)
+        fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
+                          values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
+                          title=f'Casualties by Means of Transport in {city}',hover_data=['Accidents'])
+        fig5.update_layout(uniformtext=dict(minsize=11, mode='show'))
+
+        """GRAPH 6 --- Road Type - Speed Limit """
+        road_speed_df = (filtered_dfacv.groupby(['road_type', 'speed_limit'])['accident_index'].count().rename(
+            'Accidents').to_frame())
+        road_speed_df.reset_index(inplace=True)
+        road_speed_df = road_speed_df[road_speed_df.road_type != 'Data missing or out of range']
+        road_speed_df = road_speed_df[road_speed_df.speed_limit != 'Data missing or out of range']
+
+        fig6 = px.bar(road_speed_df, x=road_speed_df['Accidents'], y=road_speed_df['road_type'],
+                      color=road_speed_df['speed_limit'], text=road_speed_df['speed_limit'],
+                      color_discrete_sequence=px.colors.sequential.Plasma_r,
+                      title=f'Number of Accidents per Road Type/Speed Limit in {city}',orientation='h')
+
+        filtered_dfacv = (filtered_dfacv.groupby(['casualty_severity'])
+                           ['accident_index'].count().rename('Total Number of Accidents').to_frame())
+        # cas_severity_df.reset_index(inplace=True)
+        # print(cas_severity_df)
+        data = filtered_dfacv['Total Number of Accidents']
+        labels = filtered_dfacv.index
+        colors = ['red', 'darkorange', 'gold']
+        fig7 = px.pie(filtered_dfacv, values=data, names=labels, hole=0.5, title=f'Casualties Severity in {city}')
+        fig7.update_traces(hoverinfo='label+percent', textfont_size=20,
+                           marker=dict(colors=colors, line=dict(color='#111111', width=1)))
+
+        return fig1, fig2, fig3, fig4, fig5, fig6, fig7
 
 
 
