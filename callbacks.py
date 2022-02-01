@@ -63,17 +63,17 @@ def update_graph(clickData, year, city):
                           title_font_color="white",
                           margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
+
         dfa_grouped = (
             df_whole.groupby(
                 # normalize all dates to start of month
                 df_whole['date'].astype('datetime64[M]')
-            )['accident_index'].count().rename('total no of accidents').to_frame()
+            )['accident_index'].count().rename('Number of Accidents').to_frame()
         )
-        dfa_grouped.head()
-        fig2 = px.line(dfa_grouped,
-                                y='total no of accidents',
-                                hover_data=['total no of accidents'],
-                                title='Accidents per Month in UK')
+        fig2 = px.scatter(dfa_grouped,
+                                y='Number of Accidents',
+                                hover_data=['Number of Accidents'],
+                                title='Accidents per Month in UK',trendline="rolling",trendline_options=dict(window=6))
 
         """GRAPH 2 --- Accidents per Daytime and Weekday Heatmap"""
 
@@ -113,10 +113,11 @@ def update_graph(clickData, year, city):
         fig3 = px.imshow(daytime_week_table, text_auto=False, color_continuous_scale='PuBu',
                          title="Accidents per Daytime and Weekday")
 
-        acc_per_year = (df_final.groupby(df_final['accident_year'])
-                              ['accident_index'].count().rename('Total Number of Accidents').to_frame())
 
-        cas_per_year = (df_final.groupby(df_final['accident_year'])
+        acc_per_year = df_whole.groupby(df_whole['date'].astype('datetime64[Y]')
+                                        )['accident_index'].count().rename('Total Number of Accidents').to_frame()
+
+        cas_per_year = (df_whole.groupby(df_whole['date'].astype('datetime64[Y]'))
                                ['number_of_casualties'].sum().rename('Total Number of Casualties').to_frame())
         acc_cas_per_year = pd.concat([acc_per_year, cas_per_year], axis=1)
         fig4 = go.Figure(
@@ -166,7 +167,7 @@ def update_graph(clickData, year, city):
         fig6 = px.bar(road_speed_df, x=road_speed_df['Accidents'], y=road_speed_df['road_type'],
                       color=road_speed_df['speed_limit'], text=road_speed_df['speed_limit'],
                       color_discrete_sequence=px.colors.sequential.Plasma_r,
-                      title="Number of Accidents per Road Type (Speed Limit Hue)",orientation='h')
+                      title="Number of Accidents per Road Type/Speed Limit",orientation='h')
 
         dfacv = (dfacv.groupby(['casualty_severity'])
                            ['accident_index'].count().rename('Total Number of Accidents').to_frame())
@@ -231,13 +232,17 @@ def update_graph(clickData, year, city):
             filtered_dfa.groupby(
                 # normalize all dates to start of month
                 filtered_dfa['date'].astype('datetime64[M]')
-            )['accident_index'].count().rename('total no of accidents').to_frame()
+            )['accident_index'].count().rename('Number of Accidents').to_frame()
         )
-        dfa_grouped.head()
-        fig2 = px.line(dfa_grouped,
-                                y='total no of accidents',
-                                hover_data=['total no of accidents'],
-                                title=f'Accidents per Month in {city}')
+        fig2 = px.scatter(dfa_grouped,
+                                y='Number of Accidents',
+                                hover_data=['Number of Accidents'],
+                                title=f'Accidents per Month in {city}',trendline="rolling",
+                                trendline_options=dict(window=6))
+        # fig2 = px.line(dfa_grouped,
+        #                         y='total no of accidents',
+        #                         hover_data=['total no of accidents'],
+        #                         title=f'Accidents per Month in {city}')
 
         """GRAPH 2 --- Accidents per Daytime and Weekday Heatmap"""
         filtered_dfa['date'] = pd.to_datetime(filtered_dfa['date'])
@@ -270,7 +275,7 @@ def update_graph(clickData, year, city):
             .unstack('Weekday') \
             .reindex(index=timeslots, columns=days)
         fig3 = px.imshow(daytime_week_table, text_auto=False, color_continuous_scale='PuBu',
-                         title="Accidents per Daytime and Weekday")
+                         title=f'Accidents per Daytime and Weekday in {city}')
 
         acc_per_year = (filtered_df_final.groupby(filtered_df_final['accident_year'])
                               ['accident_index'].count().rename('Total Number of Accidents').to_frame())
@@ -314,7 +319,7 @@ def update_graph(clickData, year, city):
         vehicle_type_casualties.reset_index(inplace=True)
         fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
                           values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
-                          title="Casualties by Means of Transport",hover_data=['Accidents'])
+                          title=f'Casualties by Means of Transport in {city}',hover_data=['Accidents'])
         fig5.update_layout(uniformtext=dict(minsize=11, mode='show'))
 
         """GRAPH 6 --- Road Type - Speed Limit """
@@ -327,7 +332,7 @@ def update_graph(clickData, year, city):
         fig6 = px.bar(road_speed_df, x=road_speed_df['Accidents'], y=road_speed_df['road_type'],
                       color=road_speed_df['speed_limit'], text=road_speed_df['speed_limit'],
                       color_discrete_sequence=px.colors.sequential.Plasma_r,
-                      title="Number of Accidents per Road Type (Speed Limit Hue)",orientation='h')
+                      title=f'Number of Accidents per Road Type/Speed Limit in {city}',orientation='h')
 
         filtered_dfacv = (filtered_dfacv.groupby(['casualty_severity'])
                            ['accident_index'].count().rename('Total Number of Accidents').to_frame())
@@ -336,7 +341,7 @@ def update_graph(clickData, year, city):
         data = filtered_dfacv['Total Number of Accidents']
         labels = filtered_dfacv.index
         colors = ['red', 'darkorange', 'gold']
-        fig7 = px.pie(filtered_dfacv, values=data, names=labels, hole=0.5, title="Casualties Severity")
+        fig7 = px.pie(filtered_dfacv, values=data, names=labels, hole=0.5, title=f'Casualties Severity in {city}')
         fig7.update_traces(hoverinfo='label+percent', textfont_size=20,
                            marker=dict(colors=colors, line=dict(color='#111111', width=1)))
 
