@@ -84,5 +84,3 @@ layout = html.Div([
         )
     ], style={"width": "100%", 'float': 'left', 'color': 'white', 'padding-left':'20%', 'padding-right':'20%'})
 ])
-
-    
