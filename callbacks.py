@@ -58,9 +58,7 @@ def update_graph(clickData, year, city):
                           yaxis=dict(gridcolor='#9D9D9D',
                                      color="#9D9D9D"),
                           paper_bgcolor='#26232C',
-                          legend_font_color='white',
-                          legend_title_font_color='white',
-                          title_font_color="white",
+                          font_color = 'white',
                           margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
 
@@ -74,6 +72,10 @@ def update_graph(clickData, year, city):
                                 y='Number of Accidents',
                                 hover_data=['Number of Accidents'],
                                 title='Accidents per Month in UK',trendline="rolling",trendline_options=dict(window=6))
+
+        fig2.update_layout(plot_bgcolor='#26232C',
+                                    paper_bgcolor='#26232C',
+                                    font_color='white')
 
         """GRAPH 2 --- Accidents per Daytime and Weekday Heatmap"""
 
@@ -113,6 +115,10 @@ def update_graph(clickData, year, city):
         fig3 = px.imshow(daytime_week_table, text_auto=False, color_continuous_scale='PuBu',
                          title="Accidents per Daytime and Weekday")
 
+        fig3.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
+
 
         acc_per_year = df_whole.groupby(df_whole['date'].astype('datetime64[Y]')
                                         )['accident_index'].count().rename('Total Number of Accidents').to_frame()
@@ -134,6 +140,9 @@ def update_graph(clickData, year, city):
         )
         # Change the bar mode
         fig4.update_layout(barmode='group')
+        fig4.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
 
         def vehicle(veh_type):
             if veh_type in range(8,10):
@@ -153,10 +162,16 @@ def update_graph(clickData, year, city):
         vehicle_type_casualties = (dfacv.groupby(['vehicle'])
                                    ['number_of_casualties'].sum().rename('Accidents').to_frame())
         vehicle_type_casualties.reset_index(inplace=True)
-        fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
-                          values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
-                          title="Casualties by Means of Transport",hover_data=['Accidents'])
-        fig5.update_layout(uniformtext=dict(minsize=11, mode='show'))
+        # fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
+        #                   values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
+        #                   title="Casualties by Means of Transport",hover_data=['Accidents'])
+        # fig5.update_layout(uniformtext=dict(minsize=11, mode='show'))
+        fig5 = px.icicle(vehicle_type_casualties, path=[px.Constant("All vehicles"), 'vehicle'],
+                values='Accidents', color='vehicle', title="Casualties by Means of Transport")
+        fig5.update_layout(margin = dict(t=50, l=25, r=25, b=25))
+        fig5.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
 
         """GRAPH 6 --- Road Type - Speed Limit """
         road_speed_df = (dfacv.groupby(['road_type', 'speed_limit'])['accident_index'].count().rename(
@@ -169,16 +184,27 @@ def update_graph(clickData, year, city):
                       color_discrete_sequence=px.colors.sequential.Plasma_r,
                       title="Number of Accidents per Road Type/Speed Limit",orientation='h')
 
+        fig6.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
+
         dfacv = (dfacv.groupby(['casualty_severity'])
                            ['accident_index'].count().rename('Total Number of Accidents').to_frame())
         # cas_severity_df.reset_index(inplace=True)
         # print(cas_severity_df)
         data = dfacv['Total Number of Accidents']
         labels = dfacv.index
-        colors = ['red', 'darkorange', 'gold']
-        fig7 = px.pie(dfacv, values=data, names=labels, hole=0.5, title="Casualties Severity")
-        fig7.update_traces(hoverinfo='label+percent', textfont_size=20,
-                           marker=dict(colors=colors, line=dict(color='#111111', width=1)))
+        # colors = ['red', 'darkorange', 'gold']
+        fig7 = px.pie(dfacv, values=data, names=labels, color='Total Number of Accidents', title="Casualties Severity",
+                      color_discrete_map={'Slight': 'green',
+                                          'Serious': 'blue',
+                                          'Fatal': 'red'})
+        fig7.update_traces(textposition='inside', textinfo='percent+label')
+        fig7.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
+        # fig7.update_traces(hoverinfo='label+percent', textfont_size=20,
+        #                    marker=dict(colors=colors, line=dict(color='#111111', width=1)))
 
         return fig1, fig2, fig3, fig4, fig5, fig6, fig7
 
@@ -218,9 +244,7 @@ def update_graph(clickData, year, city):
                           yaxis=dict(gridcolor='#9D9D9D',
                                      color="#9D9D9D"),
                           paper_bgcolor='#26232C',
-                          legend_font_color='white',
-                          legend_title_font_color='white',
-                          title_font_color="white",
+                          font_color = 'white',
                           margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
         #Filter by location
@@ -239,6 +263,9 @@ def update_graph(clickData, year, city):
                                 hover_data=['Number of Accidents'],
                                 title=f'Accidents per Month in {city}',trendline="rolling",
                                 trendline_options=dict(window=6))
+        fig2.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
         # fig2 = px.line(dfa_grouped,
         #                         y='total no of accidents',
         #                         hover_data=['total no of accidents'],
@@ -276,6 +303,9 @@ def update_graph(clickData, year, city):
             .reindex(index=timeslots, columns=days)
         fig3 = px.imshow(daytime_week_table, text_auto=False, color_continuous_scale='PuBu',
                          title=f'Accidents per Daytime and Weekday in {city}')
+        fig3.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
 
         acc_per_year = (filtered_df_final.groupby(filtered_df_final['accident_year'])
                               ['accident_index'].count().rename('Total Number of Accidents').to_frame())
@@ -298,6 +328,9 @@ def update_graph(clickData, year, city):
         )
         # Change the bar mode
         fig4.update_layout(barmode='group')
+        fig4.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
 
         def vehicle(veh_type):
             if veh_type in range(8, 10):
@@ -317,10 +350,16 @@ def update_graph(clickData, year, city):
         vehicle_type_casualties = (filtered_dfacv.groupby(['vehicle'])
                                    ['number_of_casualties'].sum().rename('Accidents').to_frame())
         vehicle_type_casualties.reset_index(inplace=True)
-        fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
-                          values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
-                          title=f'Casualties by Means of Transport in {city}',hover_data=['Accidents'])
-        fig5.update_layout(uniformtext=dict(minsize=11, mode='show'))
+        # fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
+        #                   values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
+        #                   title=f'Casualties by Means of Transport in {city}',hover_data=['Accidents'])
+        # fig5.update_layout(uniformtext=dict(minsize=11, mode='show'))
+        fig5 = px.icicle(vehicle_type_casualties, path=[px.Constant("All vehicles"), 'vehicle'],
+                         values='Accidents', color='vehicle', title="Casualties by Means of Transport")
+        fig5.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+        fig5.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
 
         """GRAPH 6 --- Road Type - Speed Limit """
         road_speed_df = (filtered_dfacv.groupby(['road_type', 'speed_limit'])['accident_index'].count().rename(
@@ -333,6 +372,9 @@ def update_graph(clickData, year, city):
                       color=road_speed_df['speed_limit'], text=road_speed_df['speed_limit'],
                       color_discrete_sequence=px.colors.sequential.Plasma_r,
                       title=f'Number of Accidents per Road Type/Speed Limit in {city}',orientation='h')
+        fig6.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
 
         filtered_dfacv = (filtered_dfacv.groupby(['casualty_severity'])
                            ['accident_index'].count().rename('Total Number of Accidents').to_frame())
@@ -340,10 +382,15 @@ def update_graph(clickData, year, city):
         # print(cas_severity_df)
         data = filtered_dfacv['Total Number of Accidents']
         labels = filtered_dfacv.index
-        colors = ['red', 'darkorange', 'gold']
-        fig7 = px.pie(filtered_dfacv, values=data, names=labels, hole=0.5, title=f'Casualties Severity in {city}')
-        fig7.update_traces(hoverinfo='label+percent', textfont_size=20,
-                           marker=dict(colors=colors, line=dict(color='#111111', width=1)))
+        # colors = ['red', 'darkorange', 'gold']
+        fig7 = px.pie(filtered_dfacv, values=data, names=labels, color='Total Number of Accidents', title="Casualties Severity",
+                      color_discrete_map={'Slight': 'green',
+                                          'Serious': 'blue',
+                                          'Fatal': 'red'})
+        fig7.update_traces(textposition='inside', textinfo='percent+label')
+        fig7.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
 
         return fig1, fig2, fig3, fig4, fig5, fig6, fig7
 

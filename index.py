@@ -19,7 +19,7 @@ dropdown = dbc.DropdownMenu(
     ],
     nav = True,
     in_navbar = True,
-    label = "Explore",
+    label = "Home",
 )
 
 navbar = dbc.Navbar(
@@ -45,6 +45,7 @@ navbar = dbc.Navbar(
                 id="navbar-collapse2",
                 navbar=True,
             ),
+        html.A(html.Button('Reset Page'), href='/exploration'),
         ]
     ),
     color="dark",

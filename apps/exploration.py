@@ -56,23 +56,14 @@ acc_cas_veh_df['casualty_severity'] = acc_cas_veh_df['casualty_severity'].map(ca
 print("Exploration")
 layout = html.Div([
     html.Div([
+    html.Div([
         html.Label("Choose a City", style={ 'color': 'white'}),
         dcc.Dropdown(
             id='city',
             options=[
                 {"label": i, "value": i} for i in cities],
             placeholder='Select a City'),
-    ], style={'color': 'black', 'width': '100%', 'padding-left':'20%', 'padding-right':'20%'}),
-    html.Div([
-        dcc.Graph(id='choropleth-map', style={'width': '60%', 'float': 'left'}, figure={}, clickData=None),
-        dcc.Graph(id='accident-graph', style={'width': '40%', 'float': 'right'}, figure={}, clickData=None),
-        dcc.Graph(id='days-hours-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
-        dcc.Graph(id='acc-cas-graph',style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
-        dcc.Graph(id='treemap-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
-        dcc.Graph(id='road-speed-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
-        dcc.Graph(id='severity-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None)
-
-    ]),
+    ], style={'color': 'black', 'width': '50%', 'padding-left':'10%', 'padding-right':'10%'}),
     html.Div([
         html.Label("Choose a Year range"),
         dcc.RangeSlider(
@@ -82,5 +73,16 @@ layout = html.Div([
             value=[2016, 2020],
             marks={str(i): {'label': str(i), 'style': {'color': 'white'}} for i in years},
         )
-    ], style={"width": "100%", 'float': 'left', 'color': 'white', 'padding-left':'20%', 'padding-right':'20%'})
+    ], style={"width": "50%", 'float': 'left', 'color': 'white', 'padding-left':'10%', 'padding-right':'10%'})
+    ], style=dict(display='flex')),
+    html.Div([
+        dcc.Graph(id='choropleth-map', style={'width': '60%', 'float': 'left'}, figure={}, clickData=None),
+        dcc.Graph(id='accident-graph', style={'width': '40%', 'float': 'right'}, figure={}, clickData=None),
+        dcc.Graph(id='days-hours-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
+        dcc.Graph(id='acc-cas-graph',style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
+        dcc.Graph(id='treemap-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
+        dcc.Graph(id='road-speed-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
+        dcc.Graph(id='severity-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None)
+
+    ])
 ])
