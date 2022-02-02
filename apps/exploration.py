@@ -65,12 +65,12 @@ layout = html.Div([
     ], style={'color': 'black', 'width': '100%', 'padding-left':'20%', 'padding-right':'20%'}),
     html.Div([
         dcc.Graph(id='choropleth-map', style={'width': '60%', 'float': 'left'}, figure={}, clickData=None),
-        dcc.Graph(id='accident-graph', style={'width': '40%', 'float': 'right'}, figure={}, clickData=None),
+        #dcc.Graph(id='accident-graph', style={'width': '40%', 'float': 'right'}, figure={}, clickData=None),
+        dcc.Graph(id='acc-cas-graph', style={'width': '40%', 'float': 'right'}, figure={}, clickData=None),
         dcc.Graph(id='days-hours-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
-        dcc.Graph(id='acc-cas-graph',style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
+        dcc.Graph(id='severity-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
         dcc.Graph(id='treemap-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
-        dcc.Graph(id='road-speed-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
-        dcc.Graph(id='severity-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None)
+        dcc.Graph(id='road-speed-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None)
 
     ]),
     html.Div([
