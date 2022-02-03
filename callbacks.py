@@ -76,8 +76,9 @@ def update_graph(click_map, click_sev, year, city):
                                ['number_of_casualties'].sum().rename('Total Number of Casualties').to_frame())
         acc_cas_per_year = pd.concat([acc_per_year, cas_per_year], axis=1)
 
-        colors = {'A': '#2d6b7d',
-                  'B': '#81451e'}
+        colors = {'A': '#fbd56e',
+                  'B': '#782b05'}
+
         fig2 = go.Figure(
             data=[
 
@@ -138,7 +139,7 @@ def update_graph(click_map, click_sev, year, city):
         data = cas_sev['Total Number of Accidents']
         labels = cas_sev.index
         colors = ['#782b05', '#d6710d', '#fbd56e']
-        fig4 = px.pie(cas_sev, values=data, names=labels, hole=0.5, title="Casualties Severity")
+        fig4 = px.pie(cas_sev, values=data, names=labels,  title="Casualties Severity")
         fig4.update_traces(hoverinfo='label+percent', textfont_size=20,
                            marker=dict(colors=colors, line=dict(color='#111111', width=1)))
         fig4.update_layout(plot_bgcolor='#26232C',
@@ -164,8 +165,9 @@ def update_graph(click_map, click_sev, year, city):
         vehicle_type_casualties = (dfacv.groupby(['vehicle'])
                                    ['number_of_casualties'].sum().rename('Accidents').to_frame())
         vehicle_type_casualties.reset_index(inplace=True)
+        colors2 = ['#782b05', '#de6900', '#e87900', '#f8b535', '#f9c84f', '#f1efc3']
         fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
-                          values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
+                          values='Accidents', color='vehicle', color_discrete_sequence=colors2,
                           title="Casualties by Means of Transport",hover_data=['Accidents'])
         fig5.update_layout(uniformtext=dict(minsize=11, mode='show'))
         fig5.update_layout(plot_bgcolor='#26232C',
@@ -180,7 +182,7 @@ def update_graph(click_map, click_sev, year, city):
         road_speed_df = road_speed_df[road_speed_df.speed_limit != 'Data missing or out of range']
         fig6 = px.bar(road_speed_df, x=road_speed_df['Accidents'], y=road_speed_df['road_type'],
                       color=road_speed_df['speed_limit'], text=road_speed_df['speed_limit'],
-                      color_discrete_sequence=px.colors.sequential.Plasma_r,
+                      color_continuous_scale=px.colors.sequential.YlOrBr,
                       title="Number of Accidents per Road Type/Speed Limit", orientation='h')
         fig6.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
@@ -192,11 +194,11 @@ def update_graph(click_map, click_sev, year, city):
         fig7 = go.Figure()
         fig7.add_trace(go.Violin(x=df_violin['casualty_class'][df_violin['sex_of_casualty'] == 'Male'],
                                 y=df_violin['age_of_casualty'][df_violin['sex_of_casualty'] == 'Male'],
-                                legendgroup='M', scalegroup='M', name='M',line_color='blue'))
+                                legendgroup='M', scalegroup='M', name='M',line_color='#fbd56e', opacity = 1))
 
         fig7.add_trace(go.Violin(x=df_violin['casualty_class'][df_violin['sex_of_casualty'] == 'Female'],
                                 y=df_violin['age_of_casualty'][df_violin['sex_of_casualty'] == 'Female'],
-                                legendgroup='F', scalegroup='F', name='F', line_color='orange'))
+                                legendgroup='F', scalegroup='F', name='F', line_color='#782b05', opacity= 1 ))
 
         fig7.update_traces(box_visible=True, meanline_visible=True)
         fig7.update_layout(title_text= 'Casualties Distribution among Casualty Class and Age', violinmode='group')
@@ -373,8 +375,8 @@ def update_graph(click_map, click_sev, year, city):
         cas_per_year = (filtered_dfacv.groupby(filtered_dfacv['date'].astype('datetime64[Y]'))
                                ['number_of_casualties'].sum().rename('Total Number of Casualties').to_frame())
         acc_cas_per_year = pd.concat([acc_per_year, cas_per_year], axis=1)
-        colors = {'A': '#2d6b7d',
-                  'B': '#81451e'}
+        colors = {'A': '#fbd56e',
+                  'B': '#782b05'}
         fig2 = go.Figure(
             data=[
                 go.Bar(name='Accidents', x=acc_cas_per_year.index, y=acc_cas_per_year['Total Number of Accidents'], yaxis='y',
@@ -445,9 +447,9 @@ def update_graph(click_map, click_sev, year, city):
         colors = ['#782b05', '#d6710d', '#fbd56e']
 
         if city is not None:
-            fig4 = px.pie(filtered_cas_sev, values=data, names=labels, hole=0.5, title=f'Casualties Severity in {city}')
+            fig4 = px.pie(filtered_cas_sev, values=data, names=labels,  title=f'Casualties Severity in {city}')
         else:
-            fig4 = px.pie(filtered_cas_sev, values=data, names=labels, hole=0.5, title='Casualties Severity')
+            fig4 = px.pie(filtered_cas_sev, values=data, names=labels, title='Casualties Severity')
 
 
         fig4.update_traces(hoverinfo='label+percent', textfont_size=20,
@@ -475,14 +477,14 @@ def update_graph(click_map, click_sev, year, city):
         vehicle_type_casualties = (filtered_dfacv.groupby(['vehicle'])
                                    ['number_of_casualties'].sum().rename('Accidents').to_frame())
         vehicle_type_casualties.reset_index(inplace=True)
-
+        colors2 = ['#782b05', '#de6900', '#e87900', '#f8b535', '#f9c84f', '#f1efc3']
         if city is not None:
             fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
-                              values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
+                              values='Accidents', color='vehicle', color_discrete_sequence=colors2,
                               title=f'Casualties by Means of Transport in {city}',hover_data=['Accidents'])
         else:
             fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
-                              values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
+                              values='Accidents', color='vehicle', color_discrete_sequence=colors2,
                               title='Casualties by Means of Transport',hover_data=['Accidents'])
 
         fig5.update_layout(uniformtext=dict(minsize=11, mode='show'))
@@ -502,13 +504,13 @@ def update_graph(click_map, click_sev, year, city):
 
             fig6 = px.bar(road_speed_df, x=road_speed_df['Accidents'], y=road_speed_df['road_type'],
                       color=road_speed_df['speed_limit'], text=road_speed_df['speed_limit'],
-                      color_discrete_sequence=px.colors.sequential.Plasma_r,
+                      color_continuous_scale=px.colors.sequential.YlOrBr,
                       title=f'Number of Accidents per Road Type/Speed Limit in {city}',orientation='h')
         else:
 
             fig6 = px.bar(road_speed_df, x=road_speed_df['Accidents'], y=road_speed_df['road_type'],
                       color=road_speed_df['speed_limit'], text=road_speed_df['speed_limit'],
-                      color_discrete_sequence=px.colors.sequential.Plasma_r,
+                      color_continuous_scale=px.colors.sequential.YlOrBr,
                       title=f'Number of Accidents per Road Type/Speed Limit',orientation='h')
 
         fig6.update_layout(plot_bgcolor='#26232C',
@@ -519,11 +521,11 @@ def update_graph(click_map, click_sev, year, city):
         fig7 = go.Figure()
         fig7.add_trace(go.Violin(x=df_violin_filtered['casualty_class'][df_violin_filtered['sex_of_casualty'] == 'Male'],
                                  y=df_violin_filtered['age_of_casualty'][df_violin_filtered['sex_of_casualty'] == 'Male'],
-                                 legendgroup='M', scalegroup='M', name='M', line_color='blue'))
+                                 legendgroup='M', scalegroup='M', name='M', line_color='#fbd56e'))
 
         fig7.add_trace(go.Violin(x=df_violin_filtered['casualty_class'][df_violin_filtered['sex_of_casualty'] == 'Female'],
                                  y=df_violin_filtered['age_of_casualty'][df_violin_filtered['sex_of_casualty'] == 'Female'],
-                                 legendgroup='F', scalegroup='F', name='F', line_color='orange'))
+                                 legendgroup='F', scalegroup='F', name='F', line_color='#782b05'))
 
         fig7.update_traces(box_visible=True, meanline_visible=True)
         fig7.update_layout(violinmode='group')
