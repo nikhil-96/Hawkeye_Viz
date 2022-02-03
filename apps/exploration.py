@@ -82,7 +82,7 @@ layout = html.Div([
         dcc.Graph(id='acc-cas-graph',style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
         dcc.Graph(id='treemap-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
         dcc.Graph(id='road-speed-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
-        dcc.Graph(id='severity-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None)
-
+        dcc.Graph(id='severity-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
+        dcc.Graph(id='violin-plot', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None)
     ])
 ])

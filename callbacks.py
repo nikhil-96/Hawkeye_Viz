@@ -25,7 +25,8 @@ print("Callbacks")
      Output(component_id='acc-cas-graph', component_property='figure'),
      Output(component_id='treemap-graph', component_property='figure'),
      Output(component_id='road-speed-graph', component_property='figure'),
-     Output(component_id='severity-graph', component_property='figure')],
+     Output(component_id='severity-graph', component_property='figure'),
+     Output(component_id='violin-plot', component_property='figure')],
     [Input(component_id='choropleth-map', component_property='clickData'),
      Input(component_id='year', component_property='value'),
      Input(component_id='city', component_property='value')]
@@ -93,27 +94,19 @@ def update_graph(clickData, year, city):
 
         # define a function that turns the hours into daytime groups
         def when_was_it(hour):
-            if hour >= 5 and hour < 10:
-                return "Morning Rush"
-            elif hour >= 10 and hour < 15:
-                return "Office Hours"
-            elif hour >= 15 and hour < 19:
-                return "Afternoon Rush"
-            elif hour >= 19 and hour < 23:
-                return "Evening"
-            else:
-                return "Night"
+            return str(hour)
 
         # apply thus function to our temporary hour column
         accidents_df['daytime'] = accidents_df['hour'].apply(when_was_it)
         daytime = accidents_df['daytime'].values
-        timeslots = ['Morning Rush', 'Office Hours', 'Afternoon Rush','Evening', 'Night']
+        timeslots = ["" + str(x) for x in range(0, 24)]
+        print(timeslots)
         daytime_week_table = accidents_df.groupby([daytime, weekday], sort=False).size()
-        daytime_week_table = daytime_week_table.rename_axis(['Daytime', 'Weekday']) \
+        daytime_week_table = daytime_week_table.rename_axis(['Hour of the Day', 'Weekday']) \
             .unstack('Weekday') \
             .reindex(index=timeslots, columns=days)
-        fig3 = px.imshow(daytime_week_table, text_auto=False, color_continuous_scale='PuBu',
-                         title="Accidents per Daytime and Weekday")
+        fig3 = px.imshow(daytime_week_table, text_auto=False, color_continuous_scale='YlOrBr',
+                         title="Accidents per Daytime and Weekday", aspect='auto')
 
         fig3.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
@@ -154,13 +147,13 @@ def update_graph(clickData, year, city):
             elif veh_type == 17 or veh_type in range(19,22) or veh_type == 113:
                 return "Truck"
             else:
-                return "Other Vehicle"
+                return "Other"
 
         """GRAPH 5 --- Casualties by Means of transport / Treemap"""
         dfacv['vehicle'] = dfacv['vehicle_type'].apply(vehicle)
 
         vehicle_type_casualties = (dfacv.groupby(['vehicle'])
-                                   ['number_of_casualties'].sum().rename('Accidents').to_frame())
+                                   ['number_of_accidents'].sum().rename('Accidents').to_frame())
         vehicle_type_casualties.reset_index(inplace=True)
         # fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
         #                   values='Accidents', color='vehicle', color_discrete_sequence=px.colors.qualitative.Plotly,
