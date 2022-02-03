@@ -9,10 +9,13 @@ import json
 #app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # change to app.layout if running as single page app instead
+# Reading accidents, casualty and vehicles data from last 5 years
 dfa = pd.read_csv('data/dft-road-casualty-statistics-accident-last-5-years.csv')
 dfc = pd.read_csv('data/dft-road-casualty-statistics-casualty-last-5-years.csv')
 dfv = pd.read_csv('data/dft-road-casualty-statistics-vehicle-last-5-years.csv')
+# Reading Road safety Data guide
 road_guide = pd.read_excel('data/Road-Safety-Open-Dataset-Data-Guide.xlsx')
+# Loading UK districts geojson to draw choropleth map
 uk_cities = json.load(open("data/uk_districts.geojson", "r"))
 
 layout = html.Div([

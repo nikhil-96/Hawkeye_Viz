@@ -14,11 +14,12 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css'] #css style
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 
 # dfa.columns = dfa.columns.str.title()
-
+# Dropped missing values
 dfa.dropna(inplace=True)
 dfc.dropna(inplace=True)
 dfv.dropna(inplace=True)
 
+# Read Road Guide and replace numeric field values in datasets to labels
 district_names = road_guide[road_guide['field name'] == 'local_authority_district']
 district_names.rename(columns={"code/format":"local_authority_district"}, inplace=True)
 dfa['local_authority_district'] = dfa['local_authority_district'].map(district_names.set_index('local_authority_district')['label'])
@@ -35,11 +36,12 @@ df_final = pd.merge(df1, ons_names, on="local_authority_ons_district", how="left
 years = dfa['accident_year'].unique()
 cities = df_final['label'].dropna().unique()
 
-#merge datasets of accidents-casualties-vehicles
-casualty_vehicle_df = dfc.merge(dfv, on=['accident_index','vehicle_reference','accident_year','accident_reference'],how='inner')
+# merge datasets of accidents-casualties-vehicles
+casualty_vehicle_df = dfc.merge(dfv, on=['accident_index','vehicle_reference','accident_year','accident_reference'], how='inner')
 
-acc_cas_veh_df = casualty_vehicle_df.merge(dfa, on=['accident_index','accident_year','accident_reference'],how='inner')
+acc_cas_veh_df = casualty_vehicle_df.merge(dfa, on=['accident_index','accident_year','accident_reference'], how='inner')
 
+# Read Road Guide and replace numeric field values in datasets to labels
 cas_sev_names = road_guide[road_guide['field name'] == 'casualty_severity']
 cas_sev_names.rename(columns={"code/format":"casualty_severity"}, inplace=True)
 acc_cas_veh_df['casualty_severity'] = acc_cas_veh_df['casualty_severity'].map(cas_sev_names.set_index('casualty_severity')['label'])
@@ -73,7 +75,7 @@ acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['light_conditions'] == -1]
 acc_cas_veh_df['light_conditions'] = acc_cas_veh_df['light_conditions'].map(
     district_names.set_index('light_conditions')['label'])
 
-print("Exploration")
+# HTML divisions encompasses city-dropdown, year-slider and multiple graphs
 layout = html.Div([
     html.Div([
     html.Div([
