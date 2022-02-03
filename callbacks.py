@@ -73,8 +73,8 @@ def update_graph(click_map, click_sev, year, city):
                                ['number_of_casualties'].sum().rename('Total Number of Casualties').to_frame())
         acc_cas_per_year = pd.concat([acc_per_year, cas_per_year], axis=1)
 
-        colors = {'A': 'cornflowerblue',
-                  'B': 'navy'}
+        colors = {'A': '#2d6b7d',
+                  'B': '#81451e'}
         fig2 = go.Figure(
             data=[
 
@@ -134,7 +134,7 @@ def update_graph(click_map, click_sev, year, city):
                            ['accident_index'].count().rename('Total Number of Accidents').to_frame())
         data = cas_sev['Total Number of Accidents']
         labels = cas_sev.index
-        colors = ['red', 'darkorange', 'gold']
+        colors = ['#782b05', '#d6710d', '#fbd56e']
         fig4 = px.pie(cas_sev, values=data, names=labels, hole=0.5, title="Casualties Severity")
         fig4.update_traces(hoverinfo='label+percent', textfont_size=20,
                            marker=dict(colors=colors, line=dict(color='#111111', width=1)))
@@ -365,7 +365,7 @@ def update_graph(click_map, click_sev, year, city):
                                    yaxis=dict(gridcolor='#9D9D9D',
                                               color="#9D9D9D"),
                                    paper_bgcolor='#26232C',
-                                   font_color='white',
+                                   font_color='black',
                                    margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
 
@@ -375,8 +375,8 @@ def update_graph(click_map, click_sev, year, city):
         cas_per_year = (filtered_dfacv.groupby(filtered_dfacv['date'].astype('datetime64[Y]'))
                                ['number_of_casualties'].sum().rename('Total Number of Casualties').to_frame())
         acc_cas_per_year = pd.concat([acc_per_year, cas_per_year], axis=1)
-        colors = {'A': 'cornflowerblue',
-                  'B': 'navy'}
+        colors = {'A': '#2d6b7d',
+                  'B': '#81451e'}
         fig2 = go.Figure(
             data=[
                 go.Bar(name='Accidents', x=acc_cas_per_year.index, y=acc_cas_per_year['Total Number of Accidents'], yaxis='y',
@@ -443,7 +443,7 @@ def update_graph(click_map, click_sev, year, city):
 
         data = filtered_cas_sev['Total Number of Accidents']
         labels = filtered_cas_sev.index
-        colors = ['red', 'darkorange', 'gold']
+        colors = ['#782b05', '#d6710d', '#fbd56e']
 
         if city is not None:
             fig4 = px.pie(filtered_cas_sev, values=data, names=labels, hole=0.5, title=f'Casualties Severity in {city}')
