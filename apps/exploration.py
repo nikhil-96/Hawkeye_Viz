@@ -52,6 +52,35 @@ acc_cas_veh_df = casualty_vehicle_df.merge(dfa, on=['accident_index','accident_y
 cas_sev_names = road_guide[road_guide['field name'] == 'casualty_severity']
 cas_sev_names.rename(columns={"code/format":"casualty_severity"}, inplace=True)
 acc_cas_veh_df['casualty_severity'] = acc_cas_veh_df['casualty_severity'].map(cas_sev_names.set_index('casualty_severity')['label'])
+district_names = road_guide[road_guide['field name'] == 'casualty_class']
+district_names.rename(columns={"code/format": "casualty_class"}, inplace=True)
+acc_cas_veh_df['casualty_class'] = acc_cas_veh_df['casualty_class'].map(district_names.set_index('casualty_class')['label'])
+district_names = road_guide[road_guide['field name'] == 'sex_of_casualty']
+district_names.rename(columns={"code/format": "sex_of_casualty"}, inplace=True)
+acc_cas_veh_df['sex_of_casualty'] = acc_cas_veh_df['sex_of_casualty'].map(district_names.set_index('sex_of_casualty')['label'])
+cas_sev = acc_cas_veh_df.groupby(['casualty_severity'])['accident_index'].count().rename('Total Number of Accidents').to_frame()
+
+district_names = road_guide[road_guide['field name'] == 'urban_or_rural_area']
+district_names.rename(columns={"code/format": "urban_or_rural_area"}, inplace=True)
+acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['urban_or_rural_area'] == 3].index, inplace=True)
+acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['urban_or_rural_area'] == -1].index, inplace=True)
+acc_cas_veh_df['urban_or_rural_area'] = acc_cas_veh_df['urban_or_rural_area'].map(
+    district_names.set_index('urban_or_rural_area')['label'])
+district_names = road_guide[road_guide['field name'] == 'road_surface_conditions']
+district_names.rename(columns={"code/format": "road_surface_conditions"}, inplace=True)
+acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['road_surface_conditions'] == -1].index, inplace=True)
+acc_cas_veh_df['road_surface_conditions'] = acc_cas_veh_df['road_surface_conditions'].map(
+    district_names.set_index('road_surface_conditions')['label'])
+district_names = road_guide[road_guide['field name'] == 'weather_conditions']
+district_names.rename(columns={"code/format": "weather_conditions"}, inplace=True)
+acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['weather_conditions'] == -1].index, inplace=True)
+acc_cas_veh_df['weather_conditions'] = acc_cas_veh_df['weather_conditions'].map(
+    district_names.set_index('weather_conditions')['label'])
+district_names = road_guide[road_guide['field name'] == 'light_conditions']
+district_names.rename(columns={"code/format": "light_conditions"}, inplace=True)
+acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['light_conditions'] == -1].index, inplace=True)
+acc_cas_veh_df['light_conditions'] = acc_cas_veh_df['light_conditions'].map(
+    district_names.set_index('light_conditions')['label'])
 
 print("Exploration")
 layout = html.Div([
@@ -65,14 +94,15 @@ layout = html.Div([
     ], style={'color': 'black', 'width': '100%', 'padding-left':'20%', 'padding-right':'20%'}),
     html.Div([
         dcc.Graph(id='choropleth-map', style={'width': '60%', 'float': 'left'}, figure={}, clickData=None),
-        #dcc.Graph(id='accident-graph', style={'width': '40%', 'float': 'right'}, figure={}, clickData=None),
-        dcc.Graph(id='acc-cas-graph', style={'width': '40%', 'float': 'right'}, figure={}, clickData=None),
+        dcc.Graph(id='severity-graph', style={'width': '40%', 'float': 'right'}, figure={}, clickData=None),
         dcc.Graph(id='days-hours-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
-        dcc.Graph(id='severity-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
+        dcc.Graph(id='acc-cas-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
         dcc.Graph(id='treemap-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
-        dcc.Graph(id='road-speed-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None)
-
+        dcc.Graph(id='road-speed-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None),
+        dcc.Graph(id='violin-graph', style={'width': '50%', 'float': 'left'}, figure={}, clickData=None),
+        dcc.Graph(id='factors-graph', style={'width': '50%', 'float': 'right'}, figure={}, clickData=None)
     ]),
+
     html.Div([
         html.Label("Choose a Year range"),
         dcc.RangeSlider(
