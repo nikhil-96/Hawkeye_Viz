@@ -19,6 +19,7 @@ from apps.home import uk_cities
 
 print("Callbacks")
 
+# Callback start in which there are multiple inputs and outputs for interaction
 @app.callback(
     [Output(component_id='choropleth-map', component_property='figure'),
      Output(component_id='acc-cas-graph', component_property='figure'),
@@ -33,7 +34,7 @@ print("Callbacks")
      Input(component_id='year', component_property='value'),
      Input(component_id='city', component_property='value')]
 )
-
+# Update graph callback function
 def update_graph(click_map, click_sev, year, city):
 
     if year:
@@ -43,8 +44,10 @@ def update_graph(click_map, click_sev, year, city):
         dfacv.drop(columns=['accident_year'], inplace=True)
         dff = dff.groupby(['local_authority_ons_district', 'label'], as_index=False).sum()
 
+# Showing default graphs and map when click_data is none
     if click_map is None and city is None and click_sev is None:
         dff.rename(columns={'number_of_accidents': 'Number of accidents', 'number_of_casualties': 'Number of casualties'}, inplace=True)
+        """Fig 1 === UK districts Choropleth map"""
         fig1 = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
                                    featureidkey="properties.lad19cd",
                                    geojson=uk_cities, color="Number of accidents", opacity=0.8,
@@ -64,7 +67,7 @@ def update_graph(click_map, click_sev, year, city):
                           margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
 
-        """GRAPH 2 --- Accidents / Casualties per year"""
+        """Fig 2 === Accidents / Casualties per year"""
 
         acc_per_year = dfacv.groupby(dfacv['date'].astype('datetime64[Y]')
                                         )['accident_index'].count().rename('Total Number of Accidents').to_frame()
@@ -95,7 +98,7 @@ def update_graph(click_map, click_sev, year, city):
                            paper_bgcolor='#26232C',
                            font_color='white')
 
-        """GRAPH 3 --- Accidents per Daytime and Weekday Heatmap"""
+        """Fig 3 === Accidents per Daytime and Weekday Heatmap"""
 
         dfacv['date'] = pd.to_datetime(dfacv['date'])
         weekday = dfacv['date'].dt.day_name()
@@ -129,7 +132,7 @@ def update_graph(click_map, click_sev, year, city):
                            paper_bgcolor='#26232C',
                            font_color='white')
 
-        """GRAPH 4 -- CASUALTY SEVERITY"""
+        """Fig 4 === CASUALTY SEVERITY"""
         cas_sev = (dfacv.groupby(['casualty_severity'])
                            ['accident_index'].count().rename('Total Number of Accidents').to_frame())
         data = cas_sev['Total Number of Accidents']
@@ -155,7 +158,7 @@ def update_graph(click_map, click_sev, year, city):
             else:
                 return "Other Vehicle"
 
-        """GRAPH 5 --- Casualties by Means of transport / Treemap"""
+        """Fig 5 === Casualties by Means of transport / Treemap"""
         dfacv['vehicle'] = dfacv['vehicle_type'].apply(vehicle)
 
         vehicle_type_casualties = (dfacv.groupby(['vehicle'])
@@ -169,7 +172,7 @@ def update_graph(click_map, click_sev, year, city):
                            paper_bgcolor='#26232C',
                            font_color='white')
 
-        """GRAPH 6 --- Road Type - Speed Limit """
+        """Fig 6 === Road Type - Speed Limit """
         road_speed_df = (dfacv.groupby(['road_type', 'speed_limit'])['accident_index'].count().rename(
             'Accidents').to_frame())
         road_speed_df.reset_index(inplace=True)
@@ -183,7 +186,7 @@ def update_graph(click_map, click_sev, year, city):
                            paper_bgcolor='#26232C',
                            font_color='white')
 
-        # GRAPH 7 --- VIOLIN PLOT
+        """Fig 7 === VIOLIN PLOT for Sex vs Age of Casualty """
 
         df_violin = dfacv
         fig7 = go.Figure()
@@ -201,7 +204,7 @@ def update_graph(click_map, click_sev, year, city):
                            paper_bgcolor='#26232C',
                            font_color='white')
 
-
+        """Fig 8 === Accident factors sub-plots"""
         fig8 = make_subplots(rows=2, cols=2)
 
         dfa_grouped = (dfacv.groupby(['urban_or_rural_area'])['accident_index'].
@@ -231,8 +234,8 @@ def update_graph(click_map, click_sev, year, city):
 
         return fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8
 
+    # Change map and graphs according to click_data
     else:
-
         if city is not None:
             print(city)
             location = dff.loc[dff['label'] == city, 'local_authority_ons_district'].iloc[0]
@@ -243,6 +246,7 @@ def update_graph(click_map, click_sev, year, city):
                     uk_city = feature
 
             dff = dff[dff['local_authority_ons_district'] == location]
+            """Fig 1 === UK districts Choropleth map"""
             fig1 = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
                                         featureidkey="properties.lad19cd",
                                         geojson=uk_cities, color="number_of_accidents", opacity=0.8,
@@ -264,15 +268,14 @@ def update_graph(click_map, click_sev, year, city):
                                margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
             if click_sev is not None:
-                json_str2 = json.dumps(click_sev,indent=2)
+                json_str2 = json.dumps(click_sev, indent=2)
                 severity = json.loads(json_str2)
                 severity_label = severity['points'][0]['label']
                 filtered_dfacv = filtered_dfacv[filtered_dfacv['casualty_severity'] == severity_label]
 
+        # Extract location and severity from json click data
         else:
-
             if click_map is not None and click_sev is None:
-
                 json_str = json.dumps(click_map, indent=2)
                 cities = json.loads(json_str)
                 location = cities['points'][0]['location']
@@ -306,12 +309,10 @@ def update_graph(click_map, click_sev, year, city):
                                    margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
             elif click_map is None and click_sev is not None:
-
                 json_str2 = json.dumps(click_sev,indent=2)
                 severity = json.loads(json_str2)
                 severity_label = severity['points'][0]['label']
                 filtered_dfacv = dfacv[dfacv['casualty_severity'] == severity_label]
-
                 fig1 = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
                                             featureidkey="properties.lad19cd",
                                             geojson=uk_cities, color="number_of_accidents", opacity=0.8,
@@ -331,7 +332,6 @@ def update_graph(click_map, click_sev, year, city):
                                    margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
             else:
-
                 json_str = json.dumps(click_map, indent=2)
                 cities = json.loads(json_str)
                 location = cities['points'][0]['location']
@@ -339,7 +339,6 @@ def update_graph(click_map, click_sev, year, city):
                 json_str2 = json.dumps(click_sev,indent=2)
                 severity = json.loads(json_str2)
                 severity_label = severity['points'][0]['label']
-
                 filtered_dfacv = dfacv[dfacv['local_authority_ons_district'] == location]
                 filtered_dfacv = filtered_dfacv[filtered_dfacv['casualty_severity'] == severity_label]
 
@@ -367,7 +366,6 @@ def update_graph(click_map, click_sev, year, city):
                                    paper_bgcolor='#26232C',
                                    font_color='white',
                                    margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
-
 
         acc_per_year = filtered_dfacv.groupby(filtered_dfacv['date'].astype('datetime64[Y]')
                                         )['accident_index'].count().rename('Total Number of Accidents').to_frame()
@@ -427,6 +425,7 @@ def update_graph(click_map, click_sev, year, city):
             .unstack('Weekday') \
             .reindex(index=timeslots, columns=days)
 
+        # Show graph and plots when city selected in click data
         if city is not None:
             fig3 = px.imshow(daytime_week_table, text_auto=False, color_continuous_scale='YlOrBr',
                              title=f"Accidents per Daytime and Weekday in {city}", aspect='auto')
