@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from plotly.subplots import make_subplots
 from apps.exploration import df_final, acc_cas_veh_df
+from apps.home import uk_cities
 
-uk_cities = json.load(open("data/uk_districts.geojson", "r"))
 print("Callbacks")
 
 @app.callback(
@@ -44,14 +44,14 @@ def update_graph(click_map, click_sev, year, city):
         dff = dff.groupby(['local_authority_ons_district', 'label'], as_index=False).sum()
 
     if click_map is None and city is None and click_sev is None:
-
+        dff.rename(columns={'number_of_accidents': 'Number of accidents', 'number_of_casualties': 'Number of casualties'}, inplace=True)
         fig1 = px.choropleth_mapbox(dff, locations="local_authority_ons_district",
                                    featureidkey="properties.lad19cd",
-                                   geojson=uk_cities, color="number_of_accidents", opacity=0.8,
+                                   geojson=uk_cities, color="Number of accidents", opacity=0.8,
                                    color_continuous_scale=px.colors.sequential.YlOrBr,
                                    hover_name="label",
                                    mapbox_style="carto-positron",
-                                   hover_data=['number_of_accidents', 'number_of_casualties'],
+                                   hover_data=['Number of accidents', 'Number of casualties'],
                                    zoom=4.5, center={"lat": 53.72, "lon": -1.96})
 
         fig1.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
@@ -202,8 +202,7 @@ def update_graph(click_map, click_sev, year, city):
                            font_color='white')
 
 
-        fig8 = make_subplots(rows=2, cols=4,
-                          horizontal_spacing = 0.05)
+        fig8 = make_subplots(rows=2, cols=2)
 
         dfa_grouped = (dfacv.groupby(['urban_or_rural_area'])['accident_index'].
                        count().rename('total_accidents').reset_index())
@@ -223,7 +222,7 @@ def update_graph(click_map, click_sev, year, city):
 
         fig8.add_trace(go.Bar(x=dfa_grouped['light_conditions'], y=dfa_grouped['total_accidents'], name="Light conditions"),
             row=2, col=2)
-        fig8.update_layout(height=700, width=1000,
+        fig8.update_layout(height=600, width=600,
                           font=dict(size=8))
         fig8.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
@@ -533,4 +532,36 @@ def update_graph(click_map, click_sev, year, city):
                            paper_bgcolor='#26232C',
                            font_color='white')
 
-        return fig1, fig2, fig3, fig4, fig5, fig6, fig7
+        fig8 = make_subplots(rows=2, cols=2)
+
+        dfa_grouped = (dfacv.groupby(['urban_or_rural_area'])['accident_index'].
+                       count().rename('total_accidents').reset_index())
+
+        fig8.add_trace(go.Bar(x=dfa_grouped['urban_or_rural_area'], y=dfa_grouped['total_accidents'], width=0.4,
+                              name="Urban or Rural area"), row=1, col=1)
+
+        dfa_grouped = (dfacv.groupby(['road_surface_conditions'])['accident_index'].count().rename(
+            'total_accidents').reset_index())
+
+        fig8.add_trace(go.Bar(x=dfa_grouped['road_surface_conditions'], y=dfa_grouped['total_accidents'],
+                              name="Road surface conditions"), row=1, col=2)
+        dfa_grouped = (
+            dfacv.groupby(['weather_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
+
+        fig8.add_trace(
+            go.Bar(x=dfa_grouped['weather_conditions'], y=dfa_grouped['total_accidents'], name="Weather conditions"),
+            row=2, col=1)
+
+        dfa_grouped = (
+            dfacv.groupby(['light_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
+
+        fig8.add_trace(
+            go.Bar(x=dfa_grouped['light_conditions'], y=dfa_grouped['total_accidents'], name="Light conditions"),
+            row=2, col=2)
+        fig8.update_layout(height=600, width=600,
+                           font=dict(size=8))
+        fig8.update_layout(plot_bgcolor='#26232C',
+                           paper_bgcolor='#26232C',
+                           font_color='white')
+
+        return fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8
