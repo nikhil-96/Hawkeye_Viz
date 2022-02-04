@@ -1,13 +1,9 @@
 import dash
-import dash_bootstrap_components as dbc
 from dash import dcc, html
-from dash.dependencies import Input, Output, ClientsideFunction
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.tools import mpl_to_plotly
-import numpy as np
 import pandas as pd
 from apps.home import dfa, dfc, dfv, road_guide
+import warnings
+warnings.filterwarnings("ignore")
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css'] #css style template
 
