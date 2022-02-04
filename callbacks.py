@@ -17,7 +17,6 @@ from plotly.subplots import make_subplots
 from apps.exploration import df_final, acc_cas_veh_df
 from apps.home import uk_cities
 
-print("Callbacks")
 
 # Callback start in which there are multiple inputs and outputs for interaction
 @app.callback(
@@ -121,7 +120,6 @@ def update_graph(click_map, click_sev, year, city):
         accidents_df['daytime'] = accidents_df['hour'].apply(when_was_it)
         daytime = accidents_df['daytime'].values
         timeslots = ["" + str(x) for x in range(0, 24)]
-        print(timeslots)
         daytime_week_table = accidents_df.groupby([daytime, weekday], sort=False).size()
         daytime_week_table = daytime_week_table.rename_axis(['Hour of the Day', 'Weekday']) \
             .unstack('Weekday') \
@@ -239,7 +237,6 @@ def update_graph(click_map, click_sev, year, city):
     # Change map and graphs according to click_data
     else:
         if city is not None:
-            print(city)
             location = dff.loc[dff['label'] == city, 'local_authority_ons_district'].iloc[0]
             filtered_dfacv = dfacv[dfacv['local_authority_ons_district'] == location]
 
@@ -421,7 +418,6 @@ def update_graph(click_map, click_sev, year, city):
         accidents_df['daytime'] = accidents_df['hour'].apply(when_was_it)
         daytime = accidents_df['daytime'].values
         timeslots = ["" + str(x) for x in range(0, 24)]
-        print(timeslots)
         daytime_week_table = accidents_df.groupby([daytime, weekday], sort=False).size()
         daytime_week_table = daytime_week_table.rename_axis(['Hour of the Day', 'Weekday']) \
             .unstack('Weekday') \
