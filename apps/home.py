@@ -31,9 +31,9 @@ layout = html.Div([
             ]),
 
         dbc.Row([
-            dbc.Col(html.H5(children='The tool consists of two main pages: Home tab, '
-                                     'this is an introduction page to the Group 45 visualization tool. '
-                                     'Exploration tab, which gives the oppurtunity to explore the dataset and '
+            dbc.Col(html.H5(children='The tool consists of two main pages: Home tab'
+                                     'which is an Introduction page to the Group 45 visualization tool and '
+                                     'Explore tab, which gives the oppurtunity to explore the dataset and '
                                      'find interesting patterns')
                     , className="mb-5")
         ]),
@@ -62,6 +62,37 @@ layout = html.Div([
                     , width=6, className="mb-4")
         ], className="mb-5")
 
-    ])
+    ]),
+
+    dbc.Navbar(
+        dbc.Container(
+            [
+                html.A([
+                    # Use row and col to control vertical alignment of logo / brand
+                    dbc.Row(
+                        [
+                            dbc.Col(html.H6(children='Created By: '), className="mt-3", width=2),
+                            dbc.Col(html.H6(children='Nikhil Patni'), className="mt-3", width=2),
+                            dbc.Col(html.H6(children='Nikolaos Giannopoulos'), className="mt-3", width=2),
+                            dbc.Col(html.H6(children='Aishvarya Viswanathan'), className="mt-3", width=2),
+                            dbc.Col(html.H6(children='Theonymfi Anogeianaki'), className="mt-3", width=2)
+                        ],
+                        align="center",
+                        no_gutters=True,
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Col(html.H6(children='Developed at Eindhoven University of Technology TU/e'), className="mt-3")
+                        ],
+                        align="center",
+                        no_gutters=True,
+                    )
+                ])
+            ]
+        ),
+        color="dark",
+        dark=True,
+        className="mb-4",
+    )
 
 ])

@@ -29,7 +29,7 @@ navbar = dbc.Navbar(
                 # Use row and col to control vertical alignment of logo / brand
                 dbc.Row(
                     [
-                        dbc.Col(dbc.NavbarBrand("JBI100 - Visualization", className="ml-2")),
+                        dbc.Col(dbc.NavbarBrand("Hawkeye", className="ml-2")),
                     ],
                     align="center",
                     no_gutters=True,

@@ -4,11 +4,7 @@
          url('cairo-black-webfont.woff') format('woff');
     font-weight: normal;
     font-style: normal;
-
 }
-
-
-
 
 @font-face {
     font-family: 'cairobold';
@@ -19,9 +15,6 @@
 
 }
 
-
-
-
 @font-face {
     font-family: 'cairoextralight';
     src: url('cairo-extralight-webfont.woff2') format('woff2'),
@@ -30,9 +23,6 @@
     font-style: normal;
 
 }
-
-
-
 
 @font-face {
     font-family: 'cairolight';
@@ -92,6 +82,13 @@ h5	{
   color: #FEFEFE;
   font-size: 18px;
   font-family: cairobold;
+  text-transform: none;
+}
+
+h6	{
+  color: #FEFEFE;
+  font-size: 14px;
+  text-transform: capitalize;
 }
 
 Label {

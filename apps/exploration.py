@@ -1,5 +1,6 @@
 import dash
 from dash import dcc, html
+import dash_bootstrap_components as dbc
 import pandas as pd
 from apps.home import dfa, dfc, dfv, road_guide
 import warnings

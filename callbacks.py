@@ -359,7 +359,7 @@ def update_graph(click_map, click_sev, year, city):
                                    yaxis=dict(gridcolor='#9D9D9D',
                                               color="#9D9D9D"),
                                    paper_bgcolor='#26232C',
-                                   font_color='black',
+                                   font_color = 'white',
                                    margin={'l': 40, 'b': 40, 't': 40, 'r': 0})
 
         acc_per_year = filtered_dfacv.groupby(filtered_dfacv['date'].astype('datetime64[Y]')
