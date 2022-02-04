@@ -56,16 +56,19 @@ acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['urban_or_rural_area'] == 
 acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['urban_or_rural_area'] == -1].index, inplace=True)
 acc_cas_veh_df['urban_or_rural_area'] = acc_cas_veh_df['urban_or_rural_area'].map(
     district_names.set_index('urban_or_rural_area')['label'])
+
 district_names = road_guide[road_guide['field name'] == 'road_surface_conditions']
 district_names.rename(columns={"code/format": "road_surface_conditions"}, inplace=True)
 acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['road_surface_conditions'] == -1].index, inplace=True)
 acc_cas_veh_df['road_surface_conditions'] = acc_cas_veh_df['road_surface_conditions'].map(
     district_names.set_index('road_surface_conditions')['label'])
+
 district_names = road_guide[road_guide['field name'] == 'weather_conditions']
 district_names.rename(columns={"code/format": "weather_conditions"}, inplace=True)
 acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['weather_conditions'] == -1].index, inplace=True)
 acc_cas_veh_df['weather_conditions'] = acc_cas_veh_df['weather_conditions'].map(
     district_names.set_index('weather_conditions')['label'])
+
 district_names = road_guide[road_guide['field name'] == 'light_conditions']
 district_names.rename(columns={"code/format": "light_conditions"}, inplace=True)
 acc_cas_veh_df.drop(acc_cas_veh_df.loc[acc_cas_veh_df['light_conditions'] == -1].index, inplace=True)
