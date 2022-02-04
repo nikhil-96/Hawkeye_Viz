@@ -50,7 +50,8 @@ def update_graph(click_map, click_sev, year, city):
                                    hover_name="label",
                                    mapbox_style="carto-positron",
                                    hover_data=['Number of accidents', 'Number of casualties'],
-                                   zoom=4.5, center={"lat": 53.72, "lon": -1.96})
+                                   zoom=4.5, center={"lat": 53.72, "lon": -1.96},
+                                    title="<i><sub>Click on any district to select</sub></i>")
 
         fig1.update_layout(plot_bgcolor='#26232C', modebar_color='#136d6d',
                           xaxis=dict(color='#9D9D9D',
@@ -506,43 +507,51 @@ def update_graph(click_map, click_sev, year, city):
                            paper_bgcolor='#26232C',
                            font_color='white')
 
+        """Fig 7 === VIOLIN PLOT for Sex vs Age of Casualty """
         df_violin_filtered = filtered_dfacv
         fig7 = go.Figure()
         fig7.add_trace(go.Violin(x=df_violin_filtered['casualty_class'][df_violin_filtered['sex_of_casualty'] == 'Male'],
                                  y=df_violin_filtered['age_of_casualty'][df_violin_filtered['sex_of_casualty'] == 'Male'],
-                                 legendgroup='M', scalegroup='M', name='Male', line_color='#fbd56e'))
+                                 legendgroup='M', scalegroup='M', name='Male', line_color='#fbd56e', opacity=1))
 
         fig7.add_trace(go.Violin(x=df_violin_filtered['casualty_class'][df_violin_filtered['sex_of_casualty'] == 'Female'],
                                  y=df_violin_filtered['age_of_casualty'][df_violin_filtered['sex_of_casualty'] == 'Female'],
-                                 legendgroup='F', scalegroup='F', name='Female', line_color='#782b05'))
+                                 legendgroup='F', scalegroup='F', name='Female', line_color='#782b05', opacity=1))
 
         fig7.update_traces(box_visible=True, meanline_visible=True)
-        fig7.update_layout(title = "<br><br>Casualties Distribution among Casualty Class and Age", violinmode='group',height=500,margin={'t': 100,'l':0,'b':100,'r':0})
+        fig7.update_layout(title="<br><br>Casualties Distribution among Casualty Class and Age", violinmode='group',
+                           height=500, margin={'t': 100, 'l': 0, 'b': 100, 'r': 0})
         fig7.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
                            font_color='white', yaxis={'title': 'Age of Casualty'})
 
+        """Fig 8 === Accident factors sub-plots"""
         fig8 = make_subplots(rows=1, cols=3,
                              subplot_titles=("Urban/Rural", "Road surface conditions", "Light conditions"),
-                             shared_yaxes = True)
+                             shared_yaxes=True)
 
-        dfa_grouped = (dfacv.groupby(['urban_or_rural_area'])['accident_index'].
+        dfa_grouped = (filtered_dfacv.groupby(['urban_or_rural_area'])['accident_index'].
                        count().rename('total_accidents').reset_index())
 
         fig8.add_trace(go.Bar(x=dfa_grouped['urban_or_rural_area'], y=dfa_grouped['total_accidents'], width=0.4,
-                              name="Urban or Rural area"), row=1, col=1)
+                              name="Urban or Rural area", marker=dict(
+                color='#782b05')), row=1, col=1)
 
-        dfa_grouped = (dfacv.groupby(['road_surface_conditions'])['accident_index'].count().rename(
+        dfa_grouped = (filtered_dfacv.groupby(['road_surface_conditions'])['accident_index'].count().rename(
             'total_accidents').reset_index())
 
         fig8.add_trace(go.Bar(x=dfa_grouped['road_surface_conditions'], y=dfa_grouped['total_accidents'],
-                              name="Road surface conditions"), row=1, col=2)
+                              name="Road surface conditions", marker=dict(
+                color='#d25305')), row=1, col=2)
 
-        dfa_grouped = (
-            dfacv.groupby(['light_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
+        dfa_grouped = (filtered_dfacv.groupby(['light_conditions'])['accident_index'].count().rename
+                       ('total_accidents').reset_index())
 
         fig8.add_trace(
-            go.Bar(x=dfa_grouped['light_conditions'], y=dfa_grouped['total_accidents'], name="Light conditions"),
+            go.Bar(x=dfa_grouped['light_conditions'], y=dfa_grouped['total_accidents'], name="Light conditions",
+                   marker=dict(
+                       color='#fbd56e')
+                   ),
             row=1, col=3)
         fig8.update_layout(height=500, width=600,
                            font=dict(size=8), showlegend=False)
