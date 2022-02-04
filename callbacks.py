@@ -81,11 +81,7 @@ def update_graph(click_map, click_sev, year, city):
                        offsetgroup=1,marker={'color': colors['A']}),
                 go.Bar(name='Casualties', x=acc_cas_per_year.index, y=acc_cas_per_year['Total Number of Casualties'], yaxis='y',
                        offsetgroup=2,marker={'color': colors['B']})
-            ],
-            layout={
-                'yaxis': {'title': 'Accidents/Casualties Number'},
-                'yaxis2': {'title': 'Casualties', 'overlaying': 'y', 'side': 'right'}
-            }
+            ]
         )
 
         # Change the bar mode
@@ -188,17 +184,18 @@ def update_graph(click_map, click_sev, year, city):
         fig7 = go.Figure()
         fig7.add_trace(go.Violin(x=df_violin['casualty_class'][df_violin['sex_of_casualty'] == 'Male'],
                                 y=df_violin['age_of_casualty'][df_violin['sex_of_casualty'] == 'Male'],
-                                legendgroup='M', scalegroup='M', name='M',line_color='#fbd56e', opacity = 1))
+                                legendgroup='M', scalegroup='M', name='Male',line_color='#fbd56e', opacity = 1))
 
         fig7.add_trace(go.Violin(x=df_violin['casualty_class'][df_violin['sex_of_casualty'] == 'Female'],
                                 y=df_violin['age_of_casualty'][df_violin['sex_of_casualty'] == 'Female'],
-                                legendgroup='F', scalegroup='F', name='F', line_color='#782b05', opacity= 1 ))
+                                legendgroup='F', scalegroup='F', name='Female', line_color='#782b05', opacity= 1 ))
 
         fig7.update_traces(box_visible=True, meanline_visible=True)
-        fig7.update_layout(title = "<br><br>Casualties Distribution among Casualty Class and Age", violinmode='group', height=500,margin={'t': 100,'l':0,'b':100,'r':0})
+        fig7.update_layout(title = "<br><br>Casualties Distribution among Casualty Class and Age", violinmode='group',
+                           height=500, margin={'t': 100,'l':0,'b':100,'r':0})
         fig7.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
-                           font_color='white')
+                           font_color='white', yaxis={'title': 'Age of Casualty'})
 
         """Fig 8 === Accident factors sub-plots"""
         fig8 = make_subplots(rows=1, cols=3, subplot_titles=("Urban/Rural", "Road surface conditions", "Light conditions"),
@@ -216,9 +213,6 @@ def update_graph(click_map, click_sev, year, city):
         fig8.add_trace(go.Bar(x=dfa_grouped['road_surface_conditions'], y=dfa_grouped['total_accidents'],
                              name="Road surface conditions", marker = dict(
         color= '#d25305')), row=1, col=2)
-        #dfa_grouped = (dfacv.groupby(['weather_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
-
-        #fig8.add_trace(go.Bar(x=dfa_grouped['weather_conditions'], y=dfa_grouped['total_accidents'], name="Weather conditions"),row=2, col=1)
 
         dfa_grouped = (dfacv.groupby(['light_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
 
@@ -227,11 +221,12 @@ def update_graph(click_map, click_sev, year, city):
                                   color='#fbd56e')
                               ),
             row=1, col=3)
-        fig8.update_layout(height=500, width=800,
+        fig8.update_layout(height=500, width=600,
                           font=dict(size=8), showlegend=False)
         fig8.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
                            font_color='white')
+        fig8.update_annotations(font_size=12)
 
 
         return fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8
@@ -382,11 +377,7 @@ def update_graph(click_map, click_sev, year, city):
                        offsetgroup=1,marker={'color': colors['A']}),
                 go.Bar(name='Casualties', x=acc_cas_per_year.index, y=acc_cas_per_year['Total Number of Casualties'], yaxis='y',
                        offsetgroup=2,marker={'color': colors['B']})
-            ],
-            layout={
-                'yaxis': {'title': "Accidents/Casualties Number <br> <sup>Plot Subtitle</sup>"},
-                'yaxis2': {'title': 'Casualties', 'overlaying': 'y', 'side': 'right'}
-            }
+            ]
         )
         # Change the bar mode
         if city is not None:
@@ -519,17 +510,18 @@ def update_graph(click_map, click_sev, year, city):
         fig7 = go.Figure()
         fig7.add_trace(go.Violin(x=df_violin_filtered['casualty_class'][df_violin_filtered['sex_of_casualty'] == 'Male'],
                                  y=df_violin_filtered['age_of_casualty'][df_violin_filtered['sex_of_casualty'] == 'Male'],
-                                 legendgroup='M', scalegroup='M', name='M', line_color='#fbd56e'))
+                                 legendgroup='M', scalegroup='M', name='Male', line_color='#fbd56e'))
 
         fig7.add_trace(go.Violin(x=df_violin_filtered['casualty_class'][df_violin_filtered['sex_of_casualty'] == 'Female'],
                                  y=df_violin_filtered['age_of_casualty'][df_violin_filtered['sex_of_casualty'] == 'Female'],
-                                 legendgroup='F', scalegroup='F', name='F', line_color='#782b05'))
+                                 legendgroup='F', scalegroup='F', name='Female', line_color='#782b05'))
 
         fig7.update_traces(box_visible=True, meanline_visible=True)
         fig7.update_layout(title = "<br><br>Casualties Distribution among Casualty Class and Age", violinmode='group',height=500,margin={'t': 100,'l':0,'b':100,'r':0})
         fig7.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
-                           font_color='white')
+                           font_color='white', yaxis={'title': 'Age of Casualty'})
+
         fig8 = make_subplots(rows=1, cols=3,
                              subplot_titles=("Urban/Rural", "Road surface conditions", "Light conditions"),
                              shared_yaxes = True)
@@ -538,19 +530,13 @@ def update_graph(click_map, click_sev, year, city):
                        count().rename('total_accidents').reset_index())
 
         fig8.add_trace(go.Bar(x=dfa_grouped['urban_or_rural_area'], y=dfa_grouped['total_accidents'], width=0.4,
-                              name="Urban or Rural area", row=1, col=1))
+                              name="Urban or Rural area"), row=1, col=1)
 
         dfa_grouped = (dfacv.groupby(['road_surface_conditions'])['accident_index'].count().rename(
             'total_accidents').reset_index())
 
         fig8.add_trace(go.Bar(x=dfa_grouped['road_surface_conditions'], y=dfa_grouped['total_accidents'],
                               name="Road surface conditions"), row=1, col=2)
-        #dfa_grouped = (
-        #    dfacv.groupby(['weather_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
-
-        #fig8.add_trace(
-        #    go.Bar(x=dfa_grouped['weather_conditions'], y=dfa_grouped['total_accidents'], name="Weather conditions"),
-        #    row=2, col=1)
 
         dfa_grouped = (
             dfacv.groupby(['light_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
@@ -558,10 +544,11 @@ def update_graph(click_map, click_sev, year, city):
         fig8.add_trace(
             go.Bar(x=dfa_grouped['light_conditions'], y=dfa_grouped['total_accidents'], name="Light conditions"),
             row=1, col=3)
-        fig8.update_layout(height=500, width=800,
+        fig8.update_layout(height=500, width=600,
                            font=dict(size=8), showlegend=False)
         fig8.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
                            font_color='white')
+        fig8.update_annotations(font_size=12)
 
         return fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8

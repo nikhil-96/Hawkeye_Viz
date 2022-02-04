@@ -76,12 +76,12 @@ acc_cas_veh_df['light_conditions'] = acc_cas_veh_df['light_conditions'].map(
 layout = html.Div([
     html.Div([
     html.Div([
-        html.Label("Choose a City", style={ 'color': 'white'}),
+        html.Label("Choose a District", style={ 'color': 'white'}),
         dcc.Dropdown(
             id='city',
             options=[
                 {"label": i, "value": i} for i in cities],
-            placeholder='Select a City'),
+            placeholder='Select a District'),
     ], style={'color': 'black', 'width': '50%', 'padding-left':'10%', 'padding-right':'10%'}),
     html.Div([
         html.Label("Choose a Year range"),

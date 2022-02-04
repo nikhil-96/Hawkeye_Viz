@@ -31,7 +31,7 @@ layout = html.Div([
             ]),
 
         dbc.Row([
-            dbc.Col(html.H5(children='The tool consists of two main pages: Home tab'
+            dbc.Col(html.H5(children='The tool consists of two main pages: Home tab '
                                      'which is an Introduction page to the Group 45 visualization tool and '
                                      'Explore tab, which gives the oppurtunity to explore the dataset and '
                                      'find interesting patterns')
