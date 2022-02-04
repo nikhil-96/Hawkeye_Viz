@@ -9,3 +9,5 @@ python-dateutil==2.8.1
 scipy==1.7.3
 seaborn==0.11.2
 openpyxl==3.0.9
+Flask==2.0.2
+waitress==2.0.0

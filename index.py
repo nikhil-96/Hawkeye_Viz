@@ -3,12 +3,12 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
-# must add this line in order for the app to be deployed successfully on Heroku
-from app import server
 from app import app
+from waitress import serve
 # import all pages in the app
 from apps import exploration, home
 import callbacks
+
 
 # building the navigation bar
 # https://github.com/facultyai/dash-bootstrap-components/blob/master/examples/advanced-component-usage/Navbars.py
@@ -82,5 +82,7 @@ def display_page(pathname):
         return home.layout
     
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+if __name__ == "__main__":
+    app.title = 'Hawkeye'
+    # app.run_server(debug=False)
+    serve(app.server, host="0.0.0.0", port=8050)

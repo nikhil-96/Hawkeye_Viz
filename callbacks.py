@@ -9,14 +9,10 @@ import json
 import numpy as np
 import pandas as pd
 import datetime
-from datetime import datetime as dt
-import pathlib
-import matplotlib.pyplot as plt
 import seaborn as sns
 from plotly.subplots import make_subplots
 from apps.exploration import df_final, acc_cas_veh_df
 from apps.home import uk_cities
-
 
 # Callback start in which there are multiple inputs and outputs for interaction
 @app.callback(
