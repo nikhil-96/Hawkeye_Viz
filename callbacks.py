@@ -155,7 +155,7 @@ def update_graph(click_map, click_sev, year, city):
             elif veh_type == 17 or veh_type in range(19,22) or veh_type == 113:
                 return "Truck"
             else:
-                return "Other Vehicle"
+                return "Others"
 
         """Fig 5 === Casualties by Means of transport / Treemap"""
         dfacv['vehicle'] = dfacv['vehicle_type'].apply(vehicle)
@@ -163,7 +163,7 @@ def update_graph(click_map, click_sev, year, city):
         vehicle_type_casualties = (dfacv.groupby(['vehicle'])
                                    ['number_of_casualties'].sum().rename('Accidents').to_frame())
         vehicle_type_casualties.reset_index(inplace=True)
-        colors2 = ['#782b05', '#de6900', '#e87900', '#f8b535', '#f9c84f', '#f1efc3']
+        colors2 = ['#3e221e', '#7a2a07', '#d25305', '#fa8f23', '#ffd879', '#fefbcf']
         fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
                           values='Accidents', color='vehicle', color_discrete_sequence=colors2,
                           title="Casualties by Means of Transport",hover_data=['Accidents'])
@@ -199,34 +199,40 @@ def update_graph(click_map, click_sev, year, city):
                                 legendgroup='F', scalegroup='F', name='F', line_color='#782b05', opacity= 1 ))
 
         fig7.update_traces(box_visible=True, meanline_visible=True)
-        fig7.update_layout(title_text= 'Casualties Distribution among Casualty Class and Age', violinmode='group')
+        fig7.update_layout(title = "<br><br>Casualties Distribution among Casualty Class and Age", violinmode='group', height=500,margin={'t': 100,'l':0,'b':100,'r':0})
         fig7.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
                            font_color='white')
 
         """Fig 8 === Accident factors sub-plots"""
-        fig8 = make_subplots(rows=2, cols=2)
+        fig8 = make_subplots(rows=1, cols=3, subplot_titles=("Urban/Rural", "Road surface conditions", "Light conditions"),
+                             shared_yaxes = True)
 
         dfa_grouped = (dfacv.groupby(['urban_or_rural_area'])['accident_index'].
                        count().rename('total_accidents').reset_index())
 
         fig8.add_trace(go.Bar(x=dfa_grouped['urban_or_rural_area'], y=dfa_grouped['total_accidents'], width=0.4,
-                   name="Urban or Rural area"),row=1, col=1)
+                   name="Urban or Rural area", marker=dict(
+        color= '#782b05')),  row=1, col=1)
 
         dfa_grouped = (dfacv.groupby(['road_surface_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
 
         fig8.add_trace(go.Bar(x=dfa_grouped['road_surface_conditions'], y=dfa_grouped['total_accidents'],
-                             name="Road surface conditions"),row=1, col=2)
-        dfa_grouped = (dfacv.groupby(['weather_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
+                             name="Road surface conditions", marker = dict(
+        color= '#d25305')), row=1, col=2)
+        #dfa_grouped = (dfacv.groupby(['weather_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
 
-        fig8.add_trace(go.Bar(x=dfa_grouped['weather_conditions'], y=dfa_grouped['total_accidents'], name="Weather conditions"),row=2, col=1)
+        #fig8.add_trace(go.Bar(x=dfa_grouped['weather_conditions'], y=dfa_grouped['total_accidents'], name="Weather conditions"),row=2, col=1)
 
         dfa_grouped = (dfacv.groupby(['light_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
 
-        fig8.add_trace(go.Bar(x=dfa_grouped['light_conditions'], y=dfa_grouped['total_accidents'], name="Light conditions"),
-            row=2, col=2)
-        fig8.update_layout(height=600, width=600,
-                          font=dict(size=8))
+        fig8.add_trace(go.Bar(x=dfa_grouped['light_conditions'], y=dfa_grouped['total_accidents'], name="Light conditions",
+                              marker=dict(
+                                  color='#fbd56e')
+                              ),
+            row=1, col=3)
+        fig8.update_layout(height=500, width=800,
+                          font=dict(size=8), showlegend=False)
         fig8.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
                            font_color='white')
@@ -382,7 +388,7 @@ def update_graph(click_map, click_sev, year, city):
                        offsetgroup=2,marker={'color': colors['B']})
             ],
             layout={
-                'yaxis': {'title': 'Accidents/Casualties Number'},
+                'yaxis': {'title': "Accidents/Casualties Number <br> <sup>Plot Subtitle</sup>"},
                 'yaxis2': {'title': 'Casualties', 'overlaying': 'y', 'side': 'right'}
             }
         )
@@ -466,14 +472,14 @@ def update_graph(click_map, click_sev, year, city):
             elif veh_type == 17 or veh_type in range(19, 22) or veh_type == 113:
                 return "Truck"
             else:
-                return "Other Vehicle"
+                return "Others"
 
         filtered_dfacv['vehicle'] = filtered_dfacv['vehicle_type'].apply(vehicle)
 
         vehicle_type_casualties = (filtered_dfacv.groupby(['vehicle'])
                                    ['number_of_casualties'].sum().rename('Accidents').to_frame())
         vehicle_type_casualties.reset_index(inplace=True)
-        colors2 = ['#782b05', '#de6900', '#e87900', '#f8b535', '#f9c84f', '#f1efc3']
+        colors2 = ['#3e221e', '#7a2a07', '#d25305', '#fa8f23', '#ffd879', '#fefbcf']
         if city is not None:
             fig5 = px.treemap(vehicle_type_casualties, labels='vehicle', path=['vehicle'],
                               values='Accidents', color='vehicle', color_discrete_sequence=colors2,
@@ -524,39 +530,40 @@ def update_graph(click_map, click_sev, year, city):
                                  legendgroup='F', scalegroup='F', name='F', line_color='#782b05'))
 
         fig7.update_traces(box_visible=True, meanline_visible=True)
-        fig7.update_layout(violinmode='group')
+        fig7.update_layout(title = "<br><br>Casualties Distribution among Casualty Class and Age", violinmode='group',height=500,margin={'t': 100,'l':0,'b':100,'r':0})
         fig7.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
                            font_color='white')
-
-        fig8 = make_subplots(rows=2, cols=2)
+        fig8 = make_subplots(rows=1, cols=3,
+                             subplot_titles=("Urban/Rural", "Road surface conditions", "Light conditions"),
+                             shared_yaxes = True)
 
         dfa_grouped = (dfacv.groupby(['urban_or_rural_area'])['accident_index'].
                        count().rename('total_accidents').reset_index())
 
         fig8.add_trace(go.Bar(x=dfa_grouped['urban_or_rural_area'], y=dfa_grouped['total_accidents'], width=0.4,
-                              name="Urban or Rural area"), row=1, col=1)
+                              name="Urban or Rural area", row=1, col=1))
 
         dfa_grouped = (dfacv.groupby(['road_surface_conditions'])['accident_index'].count().rename(
             'total_accidents').reset_index())
 
         fig8.add_trace(go.Bar(x=dfa_grouped['road_surface_conditions'], y=dfa_grouped['total_accidents'],
                               name="Road surface conditions"), row=1, col=2)
-        dfa_grouped = (
-            dfacv.groupby(['weather_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
+        #dfa_grouped = (
+        #    dfacv.groupby(['weather_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
 
-        fig8.add_trace(
-            go.Bar(x=dfa_grouped['weather_conditions'], y=dfa_grouped['total_accidents'], name="Weather conditions"),
-            row=2, col=1)
+        #fig8.add_trace(
+        #    go.Bar(x=dfa_grouped['weather_conditions'], y=dfa_grouped['total_accidents'], name="Weather conditions"),
+        #    row=2, col=1)
 
         dfa_grouped = (
             dfacv.groupby(['light_conditions'])['accident_index'].count().rename('total_accidents').reset_index())
 
         fig8.add_trace(
             go.Bar(x=dfa_grouped['light_conditions'], y=dfa_grouped['total_accidents'], name="Light conditions"),
-            row=2, col=2)
-        fig8.update_layout(height=600, width=600,
-                           font=dict(size=8))
+            row=1, col=3)
+        fig8.update_layout(height=500, width=800,
+                           font=dict(size=8), showlegend=False)
         fig8.update_layout(plot_bgcolor='#26232C',
                            paper_bgcolor='#26232C',
                            font_color='white')
