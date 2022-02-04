@@ -1,11 +1,15 @@
-# UK Road safety Data Visualization app
+# Hawkeye_Viz
 
 ## About this app
+UK Road safety Data Visualization dashboard
 
+## Datasets
+* [Road Safety Data](https://data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data)
+* We have used last 5 years (2016-2020) of Road safety data (Accidents, Casualties and Vehicles)
 
 ## Requirements
 
-* Python 3 (add it to your path (system variables) to make sure you can access it from the command prompt)
+* Python 3.9.9 (add it to your path (system variables) to make sure you can access it from the command prompt)
 * Git (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
 ## How to run this app
@@ -38,15 +42,17 @@ In Unix system:
 
 Install all required packages by running:
 ```
+> pip == 21.2.4
 > pip install -r requirements.txt
 ```
 
 Run this app locally with:
 ```
-> python app.py
+> python index.py
 ```
-You will get a http link, open this in your browser to see the results. You can edit the code in any editor (e.g. Visual Studio Code) and if you save it you will see the results in the browser.
+You will get a http link, open this in your browser to see the results. You can edit the code in any editor (e.g. PyCharm) and if you save it you will see the results in the browser.
 
 ## Resources
 
-* [Dash](https://dash.plot.ly/)
+* [Dash](https://dash.plotly.com/)
+* [Plotly](https://plotly.com/python/)
